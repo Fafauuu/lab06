@@ -1,6 +1,6 @@
 package model;
 
-import terminals.TouristTerminal;
+import terminals.touristTerminal.TouristTerminal;
 
 public class Tourist extends Person {
     private Tour tourParticipated;

@@ -1,4 +1,4 @@
-package terminals;
+package terminals.touristTerminal;
 
 public class TouristTerminal {
 

@@ -1,6 +1,6 @@
 package model;
 
-import terminals.GuideTerminal;
+import terminals.guideTerminal.GuideTerminal;
 
 public class Guide extends Person {
     private Tour tourGuided;

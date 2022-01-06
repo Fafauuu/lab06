@@ -1,5 +1,7 @@
 package model;
 
+import exceptions.InvalidSpotsAmountException;
+
 import java.time.LocalDate;
 
 public class Tour {
@@ -45,7 +47,22 @@ public class Tour {
         return spotsAvailable;
     }
 
-    public void setSpotsAvailable(int spotsAvailable) {
+    public void setSpotsAvailable(int spotsAvailable){
+        if (spotsAvailable > spots) {
+            throw new InvalidSpotsAmountException(
+                    "SpotsAvailable: " + spotsAvailable + " is greater then overall spots: " + spots);
+        }
         this.spotsAvailable = spotsAvailable;
+    }
+
+    @Override
+    public String toString() {
+        return "Tour{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", date=" + date +
+                ", spots=" + spots +
+                ", spotsAvailable=" + spotsAvailable +
+                '}';
     }
 }
