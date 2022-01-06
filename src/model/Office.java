@@ -7,15 +7,14 @@ import utils.DatabaseHandler;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Office implements OfficeFrameListener {
-    private final List<Tour> tours;
-    private final List<Tour> tourOffers;
-    private final List<Guide> guides;
-    private final List<Tourist> participants;
+    private List<Tour> tours;
+    private List<Tour> tourOffers;
+    private List<Guide> guides;
+    private List<Tourist> tourists;
     private Socket socket;
     private String serverSocketHost;
     Gson gson = new Gson();
@@ -25,55 +24,45 @@ public class Office implements OfficeFrameListener {
 
     public static void main(String[] args) {
         Office office = new Office();
-
+//        initializeData();
 //        office.runServer();
 
 //       OfficeFrame officeFrame =  new OfficeFrame();
 //        officeFrame.setOfficeFrameListener(office);
 //        officeFrame.requestFocusInWindow();
+
+        office.saveData();
     }
 
     public Office() {
-        this.tours = DatabaseHandler.readTourList("tours.json");
-        this.tourOffers = DatabaseHandler.readTourList("tourOffers.json");
-        this.guides = new ArrayList<>();
-        this.participants = new ArrayList<>();
+        initializeData();
 
         System.out.println(tours.get(0));
         String json = gson.toJson(tours.get(0));
         System.out.println(json);
+//        addTourOffer("addTourOffer:" + json);
+        removeTourOffer("removeTourOffer:" + json);
 
         Tour tour2 = gson.fromJson(json, Tour.class);
         System.out.println(tour2);
+
+        System.out.println("tour offers:");
+        for (Tour tourOffer : tourOffers) {
+            System.out.println(tourOffer);
+        }
     }
 
-    private static void initializeData() {
-        Tour tour = new Tour("Hawaii trip");
-        tour.setDescription("Hawaii New Year trip");
-        tour.setDate(LocalDate.parse("2022-12-30"));
-        tour.setSpots(10);
-        tour.setSpotsAvailable(10);
+    private void initializeData() {
+        this.tours = DatabaseHandler.readTourList("tours.json");
+        this.tourOffers = DatabaseHandler.readTourList("tourOffers.json");
+        this.guides = new ArrayList<>();
+        this.tourists = DatabaseHandler.readTouristList("tourists.json");
+    }
 
-        Tour tour1 = new Tour("Italy tour");
-        tour1.setDescription("Italy tour across whole country");
-        tour1.setDate(LocalDate.parse("2022-08-25"));
-        tour1.setSpots(20);
-        tour1.setSpotsAvailable(20);
-
-        List<Tour> tours = new ArrayList<>();
-        tours.add(tour);
-        tours.add(tour1);
-
+    private void saveData() {
         DatabaseHandler.saveTourList("tours.json", tours);
-
-        Gson gson = new Gson();
-        System.out.println(tour);
-        String json = gson.toJson(tour);
-        System.out.println(json);
-
-        Tour tour2 = gson.fromJson(json, Tour.class);
-        System.out.println(tour2);
-
+        DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+        DatabaseHandler.saveTouristList("tourists.json", tourists);
     }
 
     private void runServer() {
@@ -93,6 +82,45 @@ public class Office implements OfficeFrameListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addTourOffer(String input) {
+        String jsonTourOffer = input.substring(input.indexOf(":") + 1);
+        Tour tourOffer = gson.fromJson(jsonTourOffer, Tour.class);
+        for (Tour offer : tourOffers) {
+            if(offer.equals(tourOffer)) return;
+        }
+        tourOffers.add(tourOffer);
+    }
+
+    public void removeTourOffer(String input) {
+        String jsonTourOffer = input.substring(input.indexOf(":") + 1);
+        Tour tourOffer = gson.fromJson(jsonTourOffer, Tour.class);
+        tourOffers.removeIf(offer -> offer.equals(tourOffer));
+    }
+
+    public void getTourOffers() {
+
+    }
+
+    public void registerForTour(String tour, String tourist) {
+
+    }
+
+    public void unregisterFromTour(String tour, String tourist) {
+
+    }
+
+    public void updateTourInfo(String tourInfo) {
+
+    }
+
+    public void addGuide(String guideInfo, String host, String port) {
+
+    }
+
+    public void removeGuide(String guideInfo, String host, String port) {
+
     }
 
     @Override
@@ -120,37 +148,5 @@ public class Office implements OfficeFrameListener {
 ////        } catch (IOException e) {
 ////            e.printStackTrace();
 ////        }
-    }
-
-    public void addTourOffer(String tour) {
-
-    }
-
-    public void removeTourOffer(String tour) {
-
-    }
-
-    public void getTourOffers() {
-
-    }
-
-    public void registerForTour(String tour, String tourist) {
-
-    }
-
-    public void unregisterFromTour(String tour, String tourist) {
-
-    }
-
-    public void updateTourInfo(String tourInfo) {
-
-    }
-
-    public void addGuide(String guideInfo, String host, String port) {
-
-    }
-
-    public void removeGuide(String guideInfo, String host, String port) {
-
     }
 }

@@ -1,13 +1,11 @@
 package model;
 
-import terminals.touristTerminal.TouristTerminal;
-
 public class Tourist extends Person {
     private Tour tourParticipated;
-    private TouristTerminal touristTerminal;
 
     public Tourist(String name, String surname) {
         super(name, surname);
+        tourParticipated = null;
     }
 
     public Tour getTourParticipated() {
@@ -16,5 +14,14 @@ public class Tourist extends Person {
 
     public void setTourParticipated(Tour tourParticipated) {
         this.tourParticipated = tourParticipated;
+    }
+
+    @Override
+    public String toString() {
+        return "Tourist{" +
+                "name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+//                ", tourParticipated=" + tourParticipated.getName() +
+                '}';
     }
 }

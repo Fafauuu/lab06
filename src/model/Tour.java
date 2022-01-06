@@ -1,18 +1,22 @@
 package model;
 
-import exceptions.InvalidSpotsAmountException;
-
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class Tour {
     private final String name;
     private String description;
     private LocalDate date;
+    private List<Tourist> participants;
     private int spots;
     private int spotsAvailable;
 
-    public Tour(String name) {
+    public Tour(String name, int spots) {
         this.name = name;
+        this.spots = spots;
+        this.spotsAvailable = spots;
     }
 
     public String getName() {
@@ -35,24 +39,23 @@ public class Tour {
         this.date = date;
     }
 
-    public int getSpots() {
-        return spots;
-    }
-
-    public void setSpots(int spots) {
-        this.spots = spots;
-    }
-
-    public int getSpotsAvailable() {
-        return spotsAvailable;
-    }
-
-    public void setSpotsAvailable(int spotsAvailable){
-        if (spotsAvailable > spots) {
-            throw new InvalidSpotsAmountException(
-                    "SpotsAvailable: " + spotsAvailable + " is greater then overall spots: " + spots);
+    public void addParticipant(Tourist tourist) {
+        if (participants == null) {
+            participants = new ArrayList<>();
         }
-        this.spotsAvailable = spotsAvailable;
+        if (!participants.contains(tourist)) {
+            participants.add(tourist);
+            spotsAvailable--;
+        } else System.out.println(tourist + " already participates in tour: " + this.name);
+    }
+
+    public void removeParticipant(Tourist tourist) {
+        for (Tourist participant : participants) {
+            if (participant.equals(tourist)) {
+                participants.remove(participant);
+                spotsAvailable++;
+            }
+        }
     }
 
     @Override
@@ -61,8 +64,22 @@ public class Tour {
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", date=" + date +
+//                ", participants=" + participants +
                 ", spots=" + spots +
                 ", spotsAvailable=" + spotsAvailable +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tour tour = (Tour) o;
+        return Objects.equals(name, tour.name) && Objects.equals(description, tour.description) && Objects.equals(date, tour.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, date);
     }
 }
