@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "name": "Spain tour",
+    "description": "¡Vamos a la Madrid y Barcelona!",
+    "date": {
+      "year": 2022,
+      "month": 6,
+      "day": 10
+    },
+    "spots": 30,
+    "spotsAvailable": 30
+  }
+]

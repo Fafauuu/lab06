@@ -4,26 +4,28 @@ import javax.swing.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-public class OfficeFrame extends JFrame {
-    private OfficeFrameListener officeFrameListener;
+public class OfficeWindow extends JFrame {
+    private OfficeWindowListener officeWindowListener;
     private JPanel panel;
     private JTextField hostField;
     private JTextField portField;
     private boolean hostNumberFilled;
     private boolean portNumberFilled;
     private JButton startServerButton;
+    private JButton stopServerButton;
 
-    public OfficeFrame() {
+    public OfficeWindow() {
         panel = new JPanel();
         panel.setLayout(null);
-        panel.setBounds(0, 0, 400, 100);
+        panel.setBounds(0, 0, 500, 100);
 
         setHostField();
         setPortField();
         setStartButton();
+        setStopButton();
 
         this.setResizable(false);
-        this.setSize(400, 110);
+        this.setSize(500, 110);
         this.add(panel);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -73,9 +75,10 @@ public class OfficeFrame extends JFrame {
         startServerButton.setBounds(210, 10, 90, 50);
         startServerButton.setEnabled(false);
         startServerButton.addActionListener(e -> {
-            if (e.getSource() == startServerButton && officeFrameListener != null) {
-                this.setVisible(false);
-                officeFrameListener.startServer(hostField.getText(), Integer.parseInt(portField.getText()));
+            if (e.getSource() == startServerButton && officeWindowListener != null) {
+                officeWindowListener.startServer(hostField.getText(), Integer.parseInt(portField.getText()));
+                startServerButton.setVisible(false);
+                stopServerButton.setVisible(true);
             }
         });
 
@@ -88,7 +91,21 @@ public class OfficeFrame extends JFrame {
         }
     }
 
-    public void setOfficeFrameListener(OfficeFrameListener officeFrameListener) {
-        this.officeFrameListener = officeFrameListener;
+    public void setOfficeFrameListener(OfficeWindowListener officeWindowListener) {
+        this.officeWindowListener = officeWindowListener;
+    }
+
+    public void setStopButton() {
+        stopServerButton = new JButton("STOP");
+        stopServerButton.setBounds(210, 10, 90, 50);
+        stopServerButton.setVisible(false);
+        stopServerButton.addActionListener(e -> {
+            if (e.getSource() == stopServerButton && officeWindowListener != null) {
+                this.setVisible(false);
+                officeWindowListener.stopServer();
+            }
+        });
+
+        this.add(stopServerButton);
     }
 }

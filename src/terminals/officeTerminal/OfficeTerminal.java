@@ -1,6 +1,7 @@
 package terminals.officeTerminal;
 
 import model.Tour;
+import utils.JsonHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +24,6 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
         OfficeTerminal officeTerminal = new OfficeTerminal();
         OfficeTerminalWindow officeTerminalView = new OfficeTerminalWindow();
         officeTerminalView.setOfficeTerminalViewListener(officeTerminal);
-//        officeTerminal.setDaemon(true);
         officeTerminal.startConnection();
     }
 
@@ -36,24 +36,14 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
             socket = new Socket("localhost", 4002);
             outputToServer = new PrintWriter(socket.getOutputStream(), true);
             inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            outputLine = "";
-            while (true) {
-//                System.out.println(sendMessageToServer);
-//                if (sendMessageToServer){
-//                    System.out.println("send this to server: " + outputLine);
-//                    outputToServer.println(outputLine);
-//                    outputLine = null;
-//                }
-
-//                System.out.println("send this to server: " + outputLine);
-//                outputToServer.println(outputLine);
-
-//                System.out.println(outputLine);
-//                if (outputLine.isEmpty()) {
-//                    System.out.println("send this to server: " + outputLine);
-//                    outputToServer.println(outputLine);
-//                    outputLine = "";
-//                }
+            String serverResponse;
+            while(true) {
+                try {
+                    serverResponse = this.inputFromServer.readLine();
+                    System.out.println("response from server: " + serverResponse);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,24 +52,22 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
 
     @Override
     public void addTourOffer(Tour tour) {
-
+        outputLine = "addTourOffer:" + JsonHandler.tourToJson(tour);
+        System.out.println("send this to server: " + outputLine);
+        outputToServer.println(outputLine);
     }
 
     @Override
     public void removeTourOffer(Tour tour) {
-
+        outputLine = "removeTourOffer:" + JsonHandler.tourToJson(tour);
+        System.out.println("send this to server: " + outputLine);
+        outputToServer.println(outputLine);
     }
 
     @Override
     public void getTourOffers() {
-//        System.out.println("parsed");
         outputLine = "getTourOffers:";
-//        System.out.println(outputLine);
-//        sendMessageToServer = true;
-//        outputToServer.println("getTourOffers:");
-
-
-//        System.out.println("send this to server: " + outputLine);
-//        outputToServer.println("outputLine");
+        System.out.println("send this to server: " + outputLine);
+        outputToServer.println(outputLine);
     }
 }

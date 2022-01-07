@@ -1,11 +1,16 @@
 package terminals.officeTerminal;
 
+import model.Tour;
+
 import javax.swing.*;
+import java.time.LocalDate;
 
 public class OfficeTerminalWindow extends JFrame {
     private OfficeTerminalWindowListener officeTerminalViewListener;
     private JPanel panel;
     private JButton getTourOffersButton;
+    private JButton addTourOfferButton;
+    private JButton removeTourOfferButton;
 
     public OfficeTerminalWindow() {
         panel = new JPanel();
@@ -13,6 +18,8 @@ public class OfficeTerminalWindow extends JFrame {
         panel.setBounds(0, 0, 500, 500);
 
         setGetTourOffersButton();
+        setAddTourOfferButton();
+        setRemoveTourOfferButton();
 
         this.setResizable(false);
         this.setSize(500, 510);
@@ -30,9 +37,36 @@ public class OfficeTerminalWindow extends JFrame {
                 officeTerminalViewListener.getTourOffers();
             }
         });
-
         this.add(getTourOffersButton);
     }
+
+    private void setAddTourOfferButton() {
+        addTourOfferButton = new JButton("ADD TOUR OFFER");
+        addTourOfferButton.setBounds(210, 100, 200, 50);
+        addTourOfferButton.addActionListener(e -> {
+            if (e.getSource() == addTourOfferButton && officeTerminalViewListener != null) {
+                Tour tour = new Tour("Spain tour", 30);
+                tour.setDescription("¡Vamos a la Madrid y Barcelona!");
+                tour.setDate(LocalDate.parse("2022-06-10"));
+                officeTerminalViewListener.addTourOffer(tour);
+            }
+        });
+        this.add(addTourOfferButton);
+    }
+    private void setRemoveTourOfferButton() {
+        removeTourOfferButton = new JButton("REMOVE TOUR OFFER");
+        removeTourOfferButton.setBounds(210, 200, 200, 50);
+        removeTourOfferButton.addActionListener(e -> {
+            if (e.getSource() == removeTourOfferButton && officeTerminalViewListener != null) {
+                Tour tour = new Tour("Spain tour", 30);
+                tour.setDescription("¡Vamos a la Madrid y Barcelona!");
+                tour.setDate(LocalDate.parse("2022-06-10"));
+                officeTerminalViewListener.removeTourOffer(tour);
+            }
+        });
+        this.add(removeTourOfferButton);
+    }
+
 
     public void setOfficeTerminalViewListener(OfficeTerminalWindowListener officeTerminalViewListener) {
         this.officeTerminalViewListener = officeTerminalViewListener;

@@ -1,5 +1,6 @@
 package terminals;
 
-public interface OfficeFrameListener {
+public interface OfficeWindowListener {
     void startServer(String host, int port);
+    void stopServer();
 }

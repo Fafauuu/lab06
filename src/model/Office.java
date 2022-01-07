@@ -1,23 +1,22 @@
 package model;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import exceptions.TouristAlreadyParticipatesException;
 import exceptions.TouristNotParticipatingException;
-import terminals.OfficeFrameListener;
+import terminals.OfficeWindow;
+import terminals.OfficeWindowListener;
 import utils.DatabaseHandler;
+import utils.JsonHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Office implements OfficeFrameListener {
+public class Office {
     private List<Tour> tours;
     private List<Tour> tourOffers;
     private List<Guide> guides;
@@ -26,16 +25,15 @@ public class Office implements OfficeFrameListener {
     private String serverSocketHost;
     PrintWriter outputToClient;
     BufferedReader inputFromClient;
-    Gson gson = new Gson();
 
     private int serverSocketPort = 4002;
     private ServerSocket serverSocket = null;
 
     public static void main(String[] args) {
         Office office = new Office();
-        office.runServer();
+        office.startServer();
 
-//       OfficeFrame officeFrame =  new OfficeFrame();
+//        OfficeWindow officeFrame =  new OfficeWindow();
 //        officeFrame.setOfficeFrameListener(office);
 //        officeFrame.requestFocusInWindow();
 
@@ -45,8 +43,8 @@ public class Office implements OfficeFrameListener {
     public Office() {
         initializeData();
 
-        String jsonTourist = gson.toJson(tourists.get(1));
-        String jsonTour = gson.toJson(tours.get(1));
+        String jsonTourist = JsonHandler.touristToJson(tourists.get(1));
+        String jsonTour = JsonHandler.tourToJson(tours.get(1));
 //        System.out.println(jsonTourist);
 //        System.out.println(jsonTour);
 
@@ -92,7 +90,7 @@ public class Office implements OfficeFrameListener {
         DatabaseHandler.saveTouristList("tourists.json", tourists);
     }
 
-    private void runServer() {
+    public void startServer() {
         try {
             serverSocket = new ServerSocket(serverSocketPort);
             System.out.println("socket server local port: " +  serverSocket.getLocalPort());
@@ -105,11 +103,22 @@ public class Office implements OfficeFrameListener {
                 try {
                     inputFromClient= this.inputFromClient.readLine();
                     System.out.println("input from client: " + inputFromClient);
-                    if (inputFromClient.equals("getTourOffers:")) {
-                        System.out.println("it worked");
+                    if (inputFromClient.contains("getTourOffers:")) {
+                        String responseToClient = getTourOffers();
+                        outputToClient.println(responseToClient);
+                    }
+                    if (inputFromClient.contains("addTourOffer:")) {
+                        String responseToClient = addTourOffer(inputFromClient);
+                        outputToClient.println(responseToClient);
+                        DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+                    }
+                    if (inputFromClient.contains("removeTourOffer:")) {
+                        String responseToClient = removeTourOffer(inputFromClient);
+                        outputToClient.println(responseToClient);
+                        DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    stopServer();
                 }
             }
         } catch (IOException e) {
@@ -117,33 +126,43 @@ public class Office implements OfficeFrameListener {
         }
     }
 
+//    @Override
+    public void stopServer(){
+        try {
+            inputFromClient.close();
+            outputToClient.close();
+            clientSocket.close();
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private String addTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
-        Tour tourOffer = gson.fromJson(jsonTourOffer, Tour.class);
+        Tour tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
         for (Tour offer : tourOffers) {
             if(offer.equals(tourOffer)) return "Tour offer " + tourOffer.getName() + " already exists";
         }
         tourOffers.add(tourOffer);
-        return "Tour offer " + tourOffer.getName() + " added successfully";
+        return "Tour offer \"" + tourOffer.getName() + "\" added successfully";
     }
 
     private String removeTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
-        Tour tourOffer = gson.fromJson(jsonTourOffer, Tour.class);
-        tourOffers.removeIf(offer -> offer.equals(tourOffer));
+        Tour tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
         for (Tour offer : tourOffers) {
             if (offer.equals(tourOffer)){
+                System.out.println("before remove");
                 tourOffers.remove(offer);
-                return "Tour offer " + tourOffer.getName() + " removed";
+                return "Tour offer \"" + tourOffer.getName() + "\" removed successfully";
             }
         }
         return "Tour offer " + tourOffer.getName() + " doesnt exist";
     }
 
     private String getTourOffers() {
-        Type tourListType = new TypeToken<ArrayList<Tour>>() {
-        }.getType();
-        return "tourOffers:" + gson.toJson(tourOffers, tourListType);
+        return "tourOffers:" + JsonHandler.tourListToJson(tourOffers);
     }
 
     private String registerForTour(String input) {
@@ -162,8 +181,9 @@ public class Office implements OfficeFrameListener {
                         return touristAvailable.getName()
                                 + " "
                                 + touristAvailable.getSurname()
-                                + " successfully registered for tour: "
-                                + tourAvailable.getName();
+                                + " successfully registered for tour: \""
+                                + tourAvailable.getName()
+                                + "\"";
                     }
                 }
             }
@@ -187,7 +207,7 @@ public class Office implements OfficeFrameListener {
                         return touristAvailable.getName()
                                 + " "
                                 + touristAvailable.getSurname()
-                                + " successfully unregistered from tour: "
+                                + " successfully unregistered from tour: \""
                                 + tourAvailable.getName();
                     }
                 }
@@ -202,8 +222,8 @@ public class Office implements OfficeFrameListener {
         String[] parts = jsonInput.split("&");
         String jsonTourist = parts[0];
         String jsonTour = parts[1];
-        output[0] = gson.fromJson(jsonTourist, Tourist.class);
-        output[1] = gson.fromJson(jsonTour, Tour.class);
+        output[0] = JsonHandler.jsonToTourist(jsonTourist);
+        output[1] = JsonHandler.jsonToTour(jsonTour);
         return output;
     }
 
@@ -219,30 +239,30 @@ public class Office implements OfficeFrameListener {
 
     }
 
-    @Override
-    public void startServer(String host, int port) {
-//        serverSocketHost = host;
-//        serverSocketPort = port;
-//        try {
-//            serverSocket = new ServerSocket(port);
-//            System.out.println("socket server local port: " +  serverSocket.getLocalPort());
-//            Thread t = new Thread(() -> {
-//                while(true) {
-//                    try {
-//                        socket = serverSocket.accept();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                    System.out.println("Socket local port: " + socket.getPort());
-//                }
-//            });
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-////        try{
-////            ServerSocket ss = new ServerSocket(4000);
+//    @Override
+//    public void startServer(String host, int port) {
+////        serverSocketHost = host;
+////        serverSocketPort = port;
+////        try {
+////            serverSocket = new ServerSocket(port);
+////            System.out.println("socket server local port: " +  serverSocket.getLocalPort());
+////            Thread t = new Thread(() -> {
+////                while(true) {
+////                    try {
+////                        socket = serverSocket.accept();
+////                    } catch (IOException e) {
+////                        e.printStackTrace();
+////                    }
+////                    System.out.println("Socket local port: " + socket.getPort());
+////                }
+////            });
 ////        } catch (IOException e) {
 ////            e.printStackTrace();
 ////        }
-    }
+//////        try{
+//////            ServerSocket ss = new ServerSocket(4000);
+//////        } catch (IOException e) {
+//////            e.printStackTrace();
+//////        }
+//    }
 }
