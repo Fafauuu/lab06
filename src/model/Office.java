@@ -7,7 +7,10 @@ import exceptions.TouristNotParticipatingException;
 import terminals.OfficeFrameListener;
 import utils.DatabaseHandler;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,16 +22,18 @@ public class Office implements OfficeFrameListener {
     private List<Tour> tourOffers;
     private List<Guide> guides;
     private List<Tourist> tourists;
-    private Socket socket;
+    private Socket clientSocket;
     private String serverSocketHost;
+    PrintWriter outputToClient;
+    BufferedReader inputFromClient;
     Gson gson = new Gson();
 
-    private int serverSocketPort = 4001;
+    private int serverSocketPort = 4002;
     private ServerSocket serverSocket = null;
 
     public static void main(String[] args) {
         Office office = new Office();
-//        office.runServer();
+        office.runServer();
 
 //       OfficeFrame officeFrame =  new OfficeFrame();
 //        officeFrame.setOfficeFrameListener(office);
@@ -91,16 +96,22 @@ public class Office implements OfficeFrameListener {
         try {
             serverSocket = new ServerSocket(serverSocketPort);
             System.out.println("socket server local port: " +  serverSocket.getLocalPort());
-//            Thread t = new Thread(() -> {
-                while(true) {
-                    try {
-                        socket = serverSocket.accept();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+            clientSocket = serverSocket.accept();
+            System.out.println("Socket local port: " + clientSocket.getPort());
+            outputToClient = new PrintWriter(clientSocket.getOutputStream(), true);
+            inputFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            String inputFromClient;
+            while(true) {
+                try {
+                    inputFromClient= this.inputFromClient.readLine();
+                    System.out.println("input from client: " + inputFromClient);
+                    if (inputFromClient.equals("getTourOffers:")) {
+                        System.out.println("it worked");
                     }
-                    System.out.println("Socket local port: " + socket.getPort());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-//            });
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

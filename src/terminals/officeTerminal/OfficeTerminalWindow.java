@@ -2,12 +2,12 @@ package terminals.officeTerminal;
 
 import javax.swing.*;
 
-public class OfficeTerminalView extends JFrame {
-    private OfficeTerminalViewListener officeTerminalViewListener;
+public class OfficeTerminalWindow extends JFrame {
+    private OfficeTerminalWindowListener officeTerminalViewListener;
     private JPanel panel;
     private JButton getTourOffersButton;
 
-    public OfficeTerminalView() {
+    public OfficeTerminalWindow() {
         panel = new JPanel();
         panel.setLayout(null);
         panel.setBounds(0, 0, 500, 500);
@@ -34,7 +34,7 @@ public class OfficeTerminalView extends JFrame {
         this.add(getTourOffersButton);
     }
 
-    public void setOfficeTerminalViewListener(OfficeTerminalViewListener officeTerminalViewListener) {
+    public void setOfficeTerminalViewListener(OfficeTerminalWindowListener officeTerminalViewListener) {
         this.officeTerminalViewListener = officeTerminalViewListener;
     }
 }

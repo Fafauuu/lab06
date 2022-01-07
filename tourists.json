@@ -1,17 +1,1 @@
-[
-  {
-    "toursParticipated": [],
-    "name": "Ksawery",
-    "surname": "Lis"
-  },
-  {
-    "toursParticipated": [],
-    "name": "Antoni",
-    "surname": "Kowalski"
-  },
-  {
-    "toursParticipated": [],
-    "name": "Gabriel",
-    "surname": "Mazurek"
-  }
-]
+[{"toursParticipated":[],"name":"Ksawery","surname":"Lis"},{"toursParticipated":[],"name":"Antoni","surname":"Kowalski"},{"toursParticipated":[],"name":"Gabriel","surname":"Mazurek"}]
