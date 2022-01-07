@@ -1,16 +1,13 @@
 package model;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class Tour {
     private final String name;
     private String description;
     private LocalDate date;
-    private List<Tourist> participants;
-    private int spots;
+    private final int spots;
     private int spotsAvailable;
 
     public Tour(String name, int spots) {
@@ -39,23 +36,12 @@ public class Tour {
         this.date = date;
     }
 
-    public void addParticipant(Tourist tourist) {
-        if (participants == null) {
-            participants = new ArrayList<>();
-        }
-        if (!participants.contains(tourist)) {
-            participants.add(tourist);
-            spotsAvailable--;
-        } else System.out.println(tourist + " already participates in tour: " + this.name);
+    public void removeSpotAvailable() {
+        this.spotsAvailable--;
     }
 
-    public void removeParticipant(Tourist tourist) {
-        for (Tourist participant : participants) {
-            if (participant.equals(tourist)) {
-                participants.remove(participant);
-                spotsAvailable++;
-            }
-        }
+    public void addSpotAvailable() {
+        this.spotsAvailable++;
     }
 
     @Override
@@ -64,7 +50,6 @@ public class Tour {
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", date=" + date +
-//                ", participants=" + participants +
                 ", spots=" + spots +
                 ", spotsAvailable=" + spotsAvailable +
                 '}';

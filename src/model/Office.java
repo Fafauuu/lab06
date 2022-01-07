@@ -1,10 +1,14 @@
 package model;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import exceptions.TouristAlreadyParticipatesException;
+import exceptions.TouristNotParticipatingException;
 import terminals.OfficeFrameListener;
 import utils.DatabaseHandler;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -24,7 +28,6 @@ public class Office implements OfficeFrameListener {
 
     public static void main(String[] args) {
         Office office = new Office();
-//        initializeData();
 //        office.runServer();
 
 //       OfficeFrame officeFrame =  new OfficeFrame();
@@ -37,19 +40,18 @@ public class Office implements OfficeFrameListener {
     public Office() {
         initializeData();
 
-        System.out.println(tours.get(0));
-        String json = gson.toJson(tours.get(0));
-        System.out.println(json);
-//        addTourOffer("addTourOffer:" + json);
-        removeTourOffer("removeTourOffer:" + json);
+        String jsonTourist = gson.toJson(tourists.get(1));
+        String jsonTour = gson.toJson(tours.get(1));
+//        System.out.println(jsonTourist);
+//        System.out.println(jsonTour);
 
-        Tour tour2 = gson.fromJson(json, Tour.class);
-        System.out.println(tour2);
-
-        System.out.println("tour offers:");
-        for (Tour tourOffer : tourOffers) {
-            System.out.println(tourOffer);
-        }
+//        System.out.println(tourists.get(0));
+//        System.out.println(tours.get(0));
+//        System.out.println(unregisterFromTour("unregisterFromTour:" + jsonTourist + "&" + jsonTour));
+//        System.out.println(registerForTour("registerForTour:" + jsonTourist + "&" + jsonTour));
+//        System.out.println("after change");
+//        System.out.println(tourists.get(0));
+//        System.out.println(tours.get(0));
     }
 
     private void initializeData() {
@@ -57,6 +59,26 @@ public class Office implements OfficeFrameListener {
         this.tourOffers = DatabaseHandler.readTourList("tourOffers.json");
         this.guides = new ArrayList<>();
         this.tourists = DatabaseHandler.readTouristList("tourists.json");
+
+//        tourists.add(new Tourist("Ksawery", "Lis"));
+//        tourists.add(new Tourist("Antoni", "Kowalski"));
+//        tourists.add(new Tourist("Gabriel", "Mazurek"));
+
+
+//        Tour tour = new Tour("Hawaii trip", 10);
+//        tour.setDescription("Hawaii New Year trip");
+//        tour.setDate(LocalDate.parse("2022-12-30"));
+//
+//        Tour tour1 = new Tour("Italy tour", 20);
+//        tour1.setDescription("Italy tour across whole country");
+//        tour1.setDate(LocalDate.parse("2022-08-25"));
+//
+//        List<Tour> tours = new ArrayList<>();
+//        tours.add(tour);
+//        tours.add(tour1);
+//
+//        DatabaseHandler.saveTourList("tours.json", tours);
+
     }
 
     private void saveData() {
@@ -84,42 +106,105 @@ public class Office implements OfficeFrameListener {
         }
     }
 
-    public void addTourOffer(String input) {
+    private String addTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
         Tour tourOffer = gson.fromJson(jsonTourOffer, Tour.class);
         for (Tour offer : tourOffers) {
-            if(offer.equals(tourOffer)) return;
+            if(offer.equals(tourOffer)) return "Tour offer " + tourOffer.getName() + " already exists";
         }
         tourOffers.add(tourOffer);
+        return "Tour offer " + tourOffer.getName() + " added successfully";
     }
 
-    public void removeTourOffer(String input) {
+    private String removeTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
         Tour tourOffer = gson.fromJson(jsonTourOffer, Tour.class);
         tourOffers.removeIf(offer -> offer.equals(tourOffer));
+        for (Tour offer : tourOffers) {
+            if (offer.equals(tourOffer)){
+                tourOffers.remove(offer);
+                return "Tour offer " + tourOffer.getName() + " removed";
+            }
+        }
+        return "Tour offer " + tourOffer.getName() + " doesnt exist";
     }
 
-    public void getTourOffers() {
+    private String getTourOffers() {
+        Type tourListType = new TypeToken<ArrayList<Tour>>() {
+        }.getType();
+        return "tourOffers:" + gson.toJson(tourOffers, tourListType);
+    }
+
+    private String registerForTour(String input) {
+        Tourist tourist = (Tourist) parseRegistrationData(input)[0];
+        Tour tour = (Tour) parseRegistrationData(input)[1];
+        for (Tour tourAvailable : tours) {
+            if (tourAvailable.equals(tour)) {
+                for (Tourist touristAvailable : tourists) {
+                    if (touristAvailable.equals(tourist)){
+                        try {
+                            touristAvailable.setToursParticipated(tourAvailable);
+                            tourAvailable.removeSpotAvailable();
+                        } catch (TouristAlreadyParticipatesException e) {
+                            return e.getMessage();
+                        }
+                        return touristAvailable.getName()
+                                + " "
+                                + touristAvailable.getSurname()
+                                + " successfully registered for tour: "
+                                + tourAvailable.getName();
+                    }
+                }
+            }
+        }
+        return "Registration failed";
+    }
+
+    private String unregisterFromTour(String input) {
+        Tourist tourist = (Tourist) parseRegistrationData(input)[0];
+        Tour tour = (Tour) parseRegistrationData(input)[1];
+        for (Tour tourAvailable : tours) {
+            if (tourAvailable.equals(tour)) {
+                for (Tourist touristAvailable : tourists) {
+                    if (touristAvailable.equals(tourist)){
+                        try {
+                            touristAvailable.removeTourParticipated(tourAvailable);
+                            tourAvailable.addSpotAvailable();
+                        } catch (TouristNotParticipatingException e) {
+                            return e.getMessage();
+                        }
+                        return touristAvailable.getName()
+                                + " "
+                                + touristAvailable.getSurname()
+                                + " successfully unregistered from tour: "
+                                + tourAvailable.getName();
+                    }
+                }
+            }
+        }
+        return "Unregistration failed";
+    }
+
+    private Object[] parseRegistrationData(String input) {
+        Object[] output = new Object[2];
+        String jsonInput = input.substring(input.indexOf(":") + 1);
+        String[] parts = jsonInput.split("&");
+        String jsonTourist = parts[0];
+        String jsonTour = parts[1];
+        output[0] = gson.fromJson(jsonTourist, Tourist.class);
+        output[1] = gson.fromJson(jsonTour, Tour.class);
+        return output;
+    }
+
+    private void updateTourInfo(String tourInfo) {
 
     }
 
-    public void registerForTour(String tour, String tourist) {
+    private void addGuide(String guideInfo, String host, String port) {
 
     }
 
-    public void unregisterFromTour(String tour, String tourist) {
-
-    }
-
-    public void updateTourInfo(String tourInfo) {
-
-    }
-
-    public void addGuide(String guideInfo, String host, String port) {
-
-    }
-
-    public void removeGuide(String guideInfo, String host, String port) {
+    private void removeGuide(String guideInfo, String host, String port) {
 
     }
 

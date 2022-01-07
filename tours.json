@@ -1,1 +1,24 @@
-[{"name":"Hawaii trip","description":"Hawaii New Year trip","date":{"year":2022,"month":12,"day":30},"participants":[{"tourParticipated":{"spots":0,"spotsAvailable":0},"name":"Ksawery","surname":"Lis"},{"tourParticipated":{"spots":0,"spotsAvailable":0},"name":"Antoni","surname":"Kowalski"}],"spots":10,"spotsAvailable":8},{"name":"Italy tour","description":"Italy tour across whole country","date":{"year":2022,"month":8,"day":25},"participants":[],"spots":20,"spotsAvailable":20},{"name":"Spain tour","description":"Tour to Madrid an Barcelona","date":{"year":2022,"month":10,"day":15},"spots":35,"spotsAvailable":35}]
+[
+  {
+    "name": "Hawaii trip",
+    "description": "Hawaii New Year trip",
+    "date": {
+      "year": 2022,
+      "month": 12,
+      "day": 30
+    },
+    "spots": 10,
+    "spotsAvailable": 10
+  },
+  {
+    "name": "Italy tour",
+    "description": "Italy tour across whole country",
+    "date": {
+      "year": 2022,
+      "month": 8,
+      "day": 25
+    },
+    "spots": 20,
+    "spotsAvailable": 20
+  }
+]

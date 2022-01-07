@@ -31,8 +31,8 @@ public class DatabaseHandler {
         return tours;
     }
 
-    public static void saveTourList(String path, List<Tour> ingredientList) {
-        String json = gson.toJson(ingredientList);
+    public static void saveTourList(String path, List<Tour> tourList) {
+        String json = gson.toJson(tourList, tourListType);
 
         try {
             FileWriter fileWriter = new FileWriter(path);

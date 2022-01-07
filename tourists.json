@@ -1,1 +1,17 @@
-[{"tourParticipated":{"name":"Hawaii trip","description":"Hawaii New Year trip","date":{"year":2022,"month":12,"day":30},"participants":[{"tourParticipated":{"spots":0,"spotsAvailable":0},"name":"Ksawery","surname":"Lis"},{"tourParticipated":{"spots":0,"spotsAvailable":0},"name":"Antoni","surname":"Kowalski"}],"spots":10,"spotsAvailable":8},"name":"Ksawery","surname":"Lis"},{"tourParticipated":{"spots":0,"spotsAvailable":0},"name":"Antoni","surname":"Kowalski"},{"tourParticipated":{"spots":0,"spotsAvailable":0},"name":"Gabriel","surname":"Mazurek"},{"tourParticipated":{"name":"Italy tour","description":"Italy tour across whole country","date":{"year":2022,"month":8,"day":25},"participants":[],"spots":20,"spotsAvailable":20},"name":"Jan","surname":"Kalinowski"}]
+[
+  {
+    "toursParticipated": [],
+    "name": "Ksawery",
+    "surname": "Lis"
+  },
+  {
+    "toursParticipated": [],
+    "name": "Antoni",
+    "surname": "Kowalski"
+  },
+  {
+    "toursParticipated": [],
+    "name": "Gabriel",
+    "surname": "Mazurek"
+  }
+]
