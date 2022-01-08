@@ -1,5 +1,6 @@
 package terminals.officeTerminal;
 
+import model.Office;
 import model.Tour;
 import utils.JsonHandler;
 
@@ -12,18 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OfficeTerminal implements OfficeTerminalWindowListener {
-    private final List<Tour> tourOffers;
+    private List<Tour> tourOffers;
     private Socket socket;
     private PrintWriter outputToServer;
     private BufferedReader inputFromServer;
     private String outputLine;
-    private String responseFromServer;
-    private boolean sendMessageToServer = false;
+    private OfficeTerminalWindow officeTerminalWindow;
 
     public static void main(String[] args) {
         OfficeTerminal officeTerminal = new OfficeTerminal();
-        OfficeTerminalWindow officeTerminalView = new OfficeTerminalWindow();
-        officeTerminalView.setOfficeTerminalViewListener(officeTerminal);
+        officeTerminal.setOfficeTerminalWindow(new OfficeTerminalWindow());
         officeTerminal.startConnection();
     }
 
@@ -33,7 +32,7 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
 
     public void startConnection() {
         try {
-            socket = new Socket("localhost", 4002);
+            socket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
             outputToServer = new PrintWriter(socket.getOutputStream(), true);
             inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String serverResponse;
@@ -41,6 +40,13 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
                 try {
                     serverResponse = this.inputFromServer.readLine();
                     System.out.println("response from server: " + serverResponse);
+                    officeTerminalWindow.showServerResponse("server response: " + serverResponse);
+
+                    if (serverResponse.contains("tourOffers:")) {
+                        String jsonTourOffer = serverResponse.substring(serverResponse.indexOf(":") + 1);
+                        tourOffers = JsonHandler.jsonToTourList(jsonTourOffer);
+                        addTourOffersToWindow();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -69,5 +75,14 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
         outputLine = "getTourOffers:";
         System.out.println("send this to server: " + outputLine);
         outputToServer.println(outputLine);
+    }
+
+    public void setOfficeTerminalWindow(OfficeTerminalWindow officeTerminalView) {
+        this.officeTerminalWindow = officeTerminalView;
+        officeTerminalView.setOfficeTerminalViewListener(this);
+    }
+
+    private void addTourOffersToWindow(){
+        officeTerminalWindow.setTourOffers(tourOffers);
     }
 }

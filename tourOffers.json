@@ -1,13 +1,1 @@
-[
-  {
-    "name": "Spain tour",
-    "description": "¡Vamos a la Madrid y Barcelona!",
-    "date": {
-      "year": 2022,
-      "month": 6,
-      "day": 10
-    },
-    "spots": 30,
-    "spotsAvailable": 30
-  }
-]
+[{"name":"Hawaii trip","description":"Hawaii New Year trip","date":{"year":2022,"month":12,"day":30},"spots":10,"spotsAvailable":10},{"name":"Italy tour","description":"Italy tour across the country","date":{"year":2022,"month":8,"day":25},"spots":20,"spotsAvailable":20}]

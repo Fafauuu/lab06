@@ -2,8 +2,6 @@ package model;
 
 import exceptions.TouristAlreadyParticipatesException;
 import exceptions.TouristNotParticipatingException;
-import terminals.OfficeWindow;
-import terminals.OfficeWindowListener;
 import utils.DatabaseHandler;
 import utils.JsonHandler;
 
@@ -17,16 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Office {
-    private List<Tour> tours;
     private List<Tour> tourOffers;
     private List<Guide> guides;
     private List<Tourist> tourists;
     private Socket clientSocket;
-    private String serverSocketHost;
     PrintWriter outputToClient;
     BufferedReader inputFromClient;
 
-    private int serverSocketPort = 4002;
+    private static final String serverSocketHost = "127.0.0.1";
+    private static final int serverSocketPort = 4001;
     private ServerSocket serverSocket = null;
 
     public static void main(String[] args) {
@@ -42,50 +39,15 @@ public class Office {
 
     public Office() {
         initializeData();
-
-        String jsonTourist = JsonHandler.touristToJson(tourists.get(1));
-        String jsonTour = JsonHandler.tourToJson(tours.get(1));
-//        System.out.println(jsonTourist);
-//        System.out.println(jsonTour);
-
-//        System.out.println(tourists.get(0));
-//        System.out.println(tours.get(0));
-//        System.out.println(unregisterFromTour("unregisterFromTour:" + jsonTourist + "&" + jsonTour));
-//        System.out.println(registerForTour("registerForTour:" + jsonTourist + "&" + jsonTour));
-//        System.out.println("after change");
-//        System.out.println(tourists.get(0));
-//        System.out.println(tours.get(0));
     }
 
     private void initializeData() {
-        this.tours = DatabaseHandler.readTourList("tours.json");
         this.tourOffers = DatabaseHandler.readTourList("tourOffers.json");
         this.guides = new ArrayList<>();
         this.tourists = DatabaseHandler.readTouristList("tourists.json");
-
-//        tourists.add(new Tourist("Ksawery", "Lis"));
-//        tourists.add(new Tourist("Antoni", "Kowalski"));
-//        tourists.add(new Tourist("Gabriel", "Mazurek"));
-
-
-//        Tour tour = new Tour("Hawaii trip", 10);
-//        tour.setDescription("Hawaii New Year trip");
-//        tour.setDate(LocalDate.parse("2022-12-30"));
-//
-//        Tour tour1 = new Tour("Italy tour", 20);
-//        tour1.setDescription("Italy tour across whole country");
-//        tour1.setDate(LocalDate.parse("2022-08-25"));
-//
-//        List<Tour> tours = new ArrayList<>();
-//        tours.add(tour);
-//        tours.add(tour1);
-//
-//        DatabaseHandler.saveTourList("tours.json", tours);
-
     }
 
     private void saveData() {
-        DatabaseHandler.saveTourList("tours.json", tours);
         DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
         DatabaseHandler.saveTouristList("tourists.json", tourists);
     }
@@ -126,7 +88,6 @@ public class Office {
         }
     }
 
-//    @Override
     public void stopServer(){
         try {
             inputFromClient.close();
@@ -137,10 +98,14 @@ public class Office {
             e.printStackTrace();
         }
     }
-
     private String addTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
-        Tour tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
+        Tour tourOffer = null;
+        try {
+            tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
+        } catch (Exception e) {
+            return "Wrong tour data type";
+        }
         for (Tour offer : tourOffers) {
             if(offer.equals(tourOffer)) return "Tour offer " + tourOffer.getName() + " already exists";
         }
@@ -151,6 +116,7 @@ public class Office {
     private String removeTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
         Tour tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
+        System.out.println(tourOffers);
         for (Tour offer : tourOffers) {
             if (offer.equals(tourOffer)){
                 System.out.println("before remove");
@@ -168,7 +134,7 @@ public class Office {
     private String registerForTour(String input) {
         Tourist tourist = (Tourist) parseRegistrationData(input)[0];
         Tour tour = (Tour) parseRegistrationData(input)[1];
-        for (Tour tourAvailable : tours) {
+        for (Tour tourAvailable : tourOffers) {
             if (tourAvailable.equals(tour)) {
                 for (Tourist touristAvailable : tourists) {
                     if (touristAvailable.equals(tourist)){
@@ -194,7 +160,7 @@ public class Office {
     private String unregisterFromTour(String input) {
         Tourist tourist = (Tourist) parseRegistrationData(input)[0];
         Tour tour = (Tour) parseRegistrationData(input)[1];
-        for (Tour tourAvailable : tours) {
+        for (Tour tourAvailable : tourOffers) {
             if (tourAvailable.equals(tour)) {
                 for (Tourist touristAvailable : tourists) {
                     if (touristAvailable.equals(tourist)){
@@ -237,6 +203,14 @@ public class Office {
 
     private void removeGuide(String guideInfo, String host, String port) {
 
+    }
+
+    public static String getServerSocketHost() {
+        return serverSocketHost;
+    }
+
+    public static int getServerSocketPort() {
+        return serverSocketPort;
     }
 
 //    @Override
