@@ -26,6 +26,10 @@ public class JsonHandler {
         return gson.toJson(tours, tourListType);
     }
 
+    public static List<Tour> jsonToTourList(String json) {
+        return gson.fromJson(json, tourListType);
+    }
+
     public static String touristToJson(Tourist tourist){
         return gson.toJson(tourist);
     }

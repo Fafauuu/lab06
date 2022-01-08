@@ -36,13 +36,4 @@ public class Tourist extends Person {
         }
         throw new TouristNotParticipatingException("Not participating in tour: " + tour.getName());
     }
-
-    @Override
-    public String toString() {
-        return "Tourist{" +
-                "name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-//                ", tourParticipated=" + tourParticipated.getName() +
-                '}';
-    }
 }

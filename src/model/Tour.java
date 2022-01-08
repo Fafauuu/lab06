@@ -44,15 +44,17 @@ public class Tour {
         this.spotsAvailable++;
     }
 
+    public int getSpots() {
+        return spots;
+    }
+
+    public int getSpotsAvailable() {
+        return spotsAvailable;
+    }
+
     @Override
     public String toString() {
-        return "Tour{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", date=" + date +
-                ", spots=" + spots +
-                ", spotsAvailable=" + spotsAvailable +
-                '}';
+        return name;
     }
 
     @Override
@@ -60,11 +62,11 @@ public class Tour {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Tour tour = (Tour) o;
-        return Objects.equals(name, tour.name) && Objects.equals(description, tour.description) && Objects.equals(date, tour.date);
+        return spots == tour.spots && Objects.equals(name, tour.name) && Objects.equals(date, tour.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, date);
+        return Objects.hash(name, date, spots);
     }
 }
