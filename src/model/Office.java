@@ -23,7 +23,7 @@ public class Office {
     BufferedReader inputFromClient;
 
     private static final String serverSocketHost = "127.0.0.1";
-    private static final int serverSocketPort = 4001;
+    private static final int serverSocketPort = 4002;
     private ServerSocket serverSocket = null;
 
     public static void main(String[] args) {
