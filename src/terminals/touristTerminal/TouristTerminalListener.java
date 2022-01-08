@@ -1,7 +1,7 @@
 package terminals.touristTerminal;
 
 public interface TouristTerminalListener {
-    void registerForTour(String tour, String tourist);
-    void unregisterFromTour(String tour, String tourist);
+    void registerForTour(String tourist, String tour);
+    void unregisterFromTour(String tourist, String tour);
     void getTourOffers();
 }

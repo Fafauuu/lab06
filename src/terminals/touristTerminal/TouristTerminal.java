@@ -36,19 +36,12 @@ public class TouristTerminal implements TouristTerminalListener{
             outputToServer = new PrintWriter(socket.getOutputStream(), true);
             inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String serverResponse;
-            while(true) {
-                try {
-                    serverResponse = this.inputFromServer.readLine();
-                    System.out.println("response from server: " + serverResponse);
-                    touristTerminalWindow.showServerResponse("server response: " + serverResponse);
-
-                    if (serverResponse.contains("tourOffers:")) {
-                        String jsonTourOffer = serverResponse.substring(serverResponse.indexOf(":") + 1);
-                        tourOffers = JsonHandler.jsonToTourList(jsonTourOffer);
-                        addTourOffersToWindow();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+            while((serverResponse = this.inputFromServer.readLine()) != null) {
+                touristTerminalWindow.showServerResponse("server response: " + serverResponse);
+                if (serverResponse.contains("tourOffers:")) {
+                    String jsonTourOffer = serverResponse.substring(serverResponse.indexOf(":") + 1);
+                    tourOffers = JsonHandler.jsonToTourList(jsonTourOffer);
+                    addTourOffersToWindow();
                 }
             }
         } catch (IOException e) {
@@ -57,13 +50,17 @@ public class TouristTerminal implements TouristTerminalListener{
     }
 
     @Override
-    public void registerForTour(String tour, String tourist) {
-//        System.out.println();
+    public void registerForTour(String tourist, String tour) {
+        outputLine = "registerForTour:";
+        System.out.println("send this to server: " + outputLine);
+        outputToServer.println(outputLine + tourist + "&" + tour);
     }
 
     @Override
     public void unregisterFromTour(String tour, String tourist) {
-
+        outputLine = "unregisterFromTour:";
+        System.out.println("send this to server: " + outputLine);
+        outputToServer.println(outputLine + tourist + "&" + tour);
     }
 
     @Override

@@ -22,19 +22,30 @@ public class Office {
     PrintWriter outputToClient;
     BufferedReader inputFromClient;
 
-    private static final String serverSocketHost = "127.0.0.1";
-    private static final int serverSocketPort = 4002;
-    private ServerSocket serverSocket = null;
+    private static final String SERVER_SOCKET_HOST = "127.0.0.1";
+    private static final int SERVER_SOCKET_PORT = 4002;
+    private static ServerSocket serverSocket;
 
     public static void main(String[] args) {
-        Office office = new Office();
-        office.startServer();
+        try {
+            serverSocket = new ServerSocket(SERVER_SOCKET_PORT);
+            for (int i = 0; i < 5; i++) {
+                new Thread(() -> {
+                    try {
+                        new Office().startServer(serverSocket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            }
+        } catch (IOException e) {
+            System.out.println("cant start server");
+        }
 
 //        OfficeWindow officeFrame =  new OfficeWindow();
 //        officeFrame.setOfficeFrameListener(office);
 //        officeFrame.requestFocusInWindow();
 
-        office.saveData();
     }
 
     public Office() {
@@ -52,41 +63,50 @@ public class Office {
         DatabaseHandler.saveTouristList("tourists.json", tourists);
     }
 
-    public void startServer() {
-        try {
-            serverSocket = new ServerSocket(serverSocketPort);
-            System.out.println("socket server local port: " +  serverSocket.getLocalPort());
-            clientSocket = serverSocket.accept();
-            System.out.println("Socket local port: " + clientSocket.getPort());
-            outputToClient = new PrintWriter(clientSocket.getOutputStream(), true);
-            inputFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String inputFromClient;
-            while(true) {
-                try {
-                    inputFromClient= this.inputFromClient.readLine();
-                    System.out.println("input from client: " + inputFromClient);
-                    if (inputFromClient.contains("getTourOffers:")) {
-                        String responseToClient = getTourOffers();
-                        outputToClient.println(responseToClient);
-                    }
-                    if (inputFromClient.contains("addTourOffer:")) {
-                        String responseToClient = addTourOffer(inputFromClient);
-                        outputToClient.println(responseToClient);
-                        DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
-                    }
-                    if (inputFromClient.contains("removeTourOffer:")) {
-                        String responseToClient = removeTourOffer(inputFromClient);
-                        outputToClient.println(responseToClient);
-                        DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
-                    }
-                } catch (IOException e) {
-                    stopServer();
+    public void startServer(ServerSocket serverSocket) throws IOException {
+        System.out.println("socket server local port: " +  serverSocket.getLocalPort());
+        clientSocket = serverSocket.accept();
+        System.out.println("Socket local port: " + clientSocket.getPort());
+        outputToClient = new PrintWriter(clientSocket.getOutputStream(), true);
+        inputFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        String inputFromClient;
+        while(true) {
+            try {
+                inputFromClient= this.inputFromClient.readLine();
+                System.out.println("input from client: " + inputFromClient);
+                if (inputFromClient.contains("getTourOffers:")) {
+                    String responseToClient = getTourOffers();
+                    outputToClient.println(responseToClient);
                 }
+                if (inputFromClient.contains("addTourOffer:")) {
+                    String responseToClient = addTourOffer(inputFromClient);
+                    outputToClient.println(responseToClient);
+                    DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+                }
+                if (inputFromClient.contains("removeTourOffer:")) {
+                    String responseToClient = removeTourOffer(inputFromClient);
+                    outputToClient.println(responseToClient);
+                    DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+                    DatabaseHandler.saveTouristList("tourists.json", tourists);
+                }
+                if (inputFromClient.contains("registerForTour:")) {
+                    String responseToClient = registerForTour(inputFromClient);
+                    outputToClient.println(responseToClient);
+                    DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+                    DatabaseHandler.saveTouristList("tourists.json", tourists);
+                }
+                if (inputFromClient.contains("unregisterFromTour:")) {
+                    String responseToClient = unregisterFromTour(inputFromClient);
+                    outputToClient.println(responseToClient);
+                    DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+                    DatabaseHandler.saveTouristList("tourists.json", tourists);
+                }
+            } catch (IOException e) {
+                stopServer();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
+
 
     public void stopServer(){
         try {
@@ -94,13 +114,14 @@ public class Office {
             outputToClient.close();
             clientSocket.close();
             serverSocket.close();
+//            this.saveData();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     private String addTourOffer(String input) {
         String jsonTourOffer = input.substring(input.indexOf(":") + 1);
-        Tour tourOffer = null;
+        Tour tourOffer;
         try {
             tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
         } catch (Exception e) {
@@ -119,7 +140,15 @@ public class Office {
         System.out.println(tourOffers);
         for (Tour offer : tourOffers) {
             if (offer.equals(tourOffer)){
-                System.out.println("before remove");
+                for (Tourist tourist : tourists) {
+                    if (tourist.getToursParticipated().contains(offer)){
+                        try {
+                            tourist.removeTourParticipated(offer);
+                        } catch (TouristNotParticipatingException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
                 tourOffers.remove(offer);
                 return "Tour offer \"" + tourOffer.getName() + "\" removed successfully";
             }
@@ -128,6 +157,8 @@ public class Office {
     }
 
     private String getTourOffers() {
+        //TODO: remove hard reading data
+        tourOffers = DatabaseHandler.readTourList("tourOffers.json");
         return "tourOffers:" + JsonHandler.tourListToJson(tourOffers);
     }
 
@@ -138,28 +169,40 @@ public class Office {
             if (tourAvailable.equals(tour)) {
                 for (Tourist touristAvailable : tourists) {
                     if (touristAvailable.equals(tourist)){
-                        try {
-                            touristAvailable.setToursParticipated(tourAvailable);
-                            tourAvailable.removeSpotAvailable();
-                        } catch (TouristAlreadyParticipatesException e) {
-                            return e.getMessage();
-                        }
-                        return touristAvailable.getName()
-                                + " "
-                                + touristAvailable.getSurname()
-                                + " successfully registered for tour: \""
-                                + tourAvailable.getName()
-                                + "\"";
+                        return tryToRegister(touristAvailable, tourAvailable);
                     }
                 }
+                tourists.add(tourist);
+                return tryToRegister(tourist, tourAvailable);
             }
         }
         return "Registration failed";
     }
 
+    private String tryToRegister(Tourist tourist, Tour tour) {
+        try {
+            tourist.setToursParticipated(tour);
+            tour.removeSpotAvailable();
+        } catch (TouristAlreadyParticipatesException e) {
+            return tourist.getName() + " "
+                    + tourist.getSurname() + " already participates in this tour";
+        }
+        return tourist.getName()
+                + " "
+                + tourist.getSurname()
+                + " successfully registered for tour: \""
+                + tour.getName()
+                + "\"";
+    }
+
     private String unregisterFromTour(String input) {
         Tourist tourist = (Tourist) parseRegistrationData(input)[0];
         Tour tour = (Tour) parseRegistrationData(input)[1];
+
+
+//        tourOffers = DatabaseHandler.readTourList("tourOffers.json");
+
+
         for (Tour tourAvailable : tourOffers) {
             if (tourAvailable.equals(tour)) {
                 for (Tourist touristAvailable : tourists) {
@@ -177,6 +220,12 @@ public class Office {
                                 + tourAvailable.getName();
                     }
                 }
+                return tourist.getName()
+                        + " "
+                        + tourist.getSurname()
+                        + "not registered for tour: \""
+                        + tour.getName()
+                        + "\"";
             }
         }
         return "Unregistration failed";
@@ -206,37 +255,10 @@ public class Office {
     }
 
     public static String getServerSocketHost() {
-        return serverSocketHost;
+        return SERVER_SOCKET_HOST;
     }
 
     public static int getServerSocketPort() {
-        return serverSocketPort;
+        return SERVER_SOCKET_PORT;
     }
-
-//    @Override
-//    public void startServer(String host, int port) {
-////        serverSocketHost = host;
-////        serverSocketPort = port;
-////        try {
-////            serverSocket = new ServerSocket(port);
-////            System.out.println("socket server local port: " +  serverSocket.getLocalPort());
-////            Thread t = new Thread(() -> {
-////                while(true) {
-////                    try {
-////                        socket = serverSocket.accept();
-////                    } catch (IOException e) {
-////                        e.printStackTrace();
-////                    }
-////                    System.out.println("Socket local port: " + socket.getPort());
-////                }
-////            });
-////        } catch (IOException e) {
-////            e.printStackTrace();
-////        }
-//////        try{
-//////            ServerSocket ss = new ServerSocket(4000);
-//////        } catch (IOException e) {
-//////            e.printStackTrace();
-//////        }
-//    }
 }

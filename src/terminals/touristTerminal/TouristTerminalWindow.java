@@ -2,9 +2,12 @@ package terminals.touristTerminal;
 
 import model.Tour;
 import model.Tourist;
+import utils.JsonHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.List;
 
 public class TouristTerminalWindow extends JFrame {
@@ -20,6 +23,11 @@ public class TouristTerminalWindow extends JFrame {
     private final JLabel tourDescriptionLabel = new JLabel();
     private JPanel serverResponsePanel;
     private JLabel serverResponseLabel;
+    private JPanel userInfoPanel;
+    private JTextField userNameTextField;
+    private JTextField userSurnameTextField;
+    private boolean nameFilled;
+    private boolean surnameFilled;
     private List<Tour> tourOffers;
     private Tourist tourist;
 
@@ -29,14 +37,14 @@ public class TouristTerminalWindow extends JFrame {
         mainPanel = new JPanel();
         mainPanel.setLayout(null);
         mainPanel.setBounds(0, 0, 1000, 600);
-        mainPanel.setBackground(new Color(0x9B9B9B));
+        mainPanel.setBackground(new Color(0x265010));
 
 //        setLoginButton();
         setGetTourOffersButton();
         setRegisterForTourButton();
         setUnregisterFromTourButton();
 //        setLoginTextField();
-//        setUserInfoTextField();
+        setUserInfoTextPanel();
         setTourList();
         setTourPanel();
         setServerResponsePanel();
@@ -49,6 +57,7 @@ public class TouristTerminalWindow extends JFrame {
         this.setVisible(true);
     }
 
+
 //    private void setLoginButton() {
 //        getTourOffersButton = new JButton("LOGIN");
 //        getTourOffersButton.setBounds(50, 480, 200, 50);
@@ -59,7 +68,6 @@ public class TouristTerminalWindow extends JFrame {
 //        });
 //        this.add(getTourOffersButton);
 //    }
-
     private void setGetTourOffersButton() {
         getTourOffersButton = new JButton("GET TOUR OFFERS");
         getTourOffersButton.setBounds(50, 480, 200, 50);
@@ -77,8 +85,16 @@ public class TouristTerminalWindow extends JFrame {
         registerForTourButton.setBounds(300, 480, 200, 50);
         registerForTourButton.addActionListener(e -> {
             if (e.getSource() == registerForTourButton && touristTerminalListener != null) {
-//                touristTerminalListener.registerForTour();
-                registerForTourButton.setEnabled(false);
+                String name = userNameTextField.getText();
+                String surname = userSurnameTextField.getText();
+                Tour tour = tourJList.getSelectedValue();
+                if (!name.isEmpty() && !surname.isEmpty() && tour != null){
+                    tourist = new Tourist(name, surname);
+                    touristTerminalListener
+                            .registerForTour(JsonHandler.touristToJson(tourist), JsonHandler.tourToJson(tour));
+                } else {
+                    showServerResponse("invalid data");
+                }
             }
         });
         this.add(registerForTourButton);
@@ -90,8 +106,16 @@ public class TouristTerminalWindow extends JFrame {
         unregisterFromTourButton.setBounds(550, 480, 200, 50);
         unregisterFromTourButton.addActionListener(e -> {
             if (e.getSource() == unregisterFromTourButton && touristTerminalListener != null) {
-//                touristTerminalListener.unregisterFromTour();
-                unregisterFromTourButton.setEnabled(false);
+                String name = userNameTextField.getText();
+                String surname = userSurnameTextField.getText();
+                Tour tour = tourJList.getSelectedValue();
+                if (!name.isEmpty() && !surname.isEmpty() && tour != null){
+                    tourist = new Tourist(name, surname);
+                    touristTerminalListener
+                            .unregisterFromTour(JsonHandler.touristToJson(tourist), JsonHandler.tourToJson(tour));
+                } else {
+                    showServerResponse("invalid data");
+                }
             }
         });
         this.add(unregisterFromTourButton);
@@ -158,6 +182,60 @@ public class TouristTerminalWindow extends JFrame {
         serverResponseLabel.setBounds(0,0,400,50);
         serverResponsePanel.add(serverResponseLabel);
         this.add(serverResponsePanel);
+    }
+
+    private void setUserInfoTextPanel() {
+        userInfoPanel = new JPanel();
+        userInfoPanel.setLayout(null);
+        userInfoPanel.setBounds(600,100,300,50);
+        setUserNameTextField();
+        setUserSurnameTextField();
+        this.add(userInfoPanel);
+    }
+
+    private void setUserSurnameTextField() {
+        userSurnameTextField = new JTextField("surname");
+        userSurnameTextField.setBounds(155,5,140,40);
+        userSurnameTextField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                userSurnameTextField.setText("");
+                surnameFilled = true;
+                enableRegistrationButtons();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+
+            }
+        });
+        userInfoPanel.add(userSurnameTextField);
+    }
+
+    private void setUserNameTextField() {
+        userNameTextField = new JTextField("name");
+        userNameTextField.setBounds(5,5,140,40);
+        userNameTextField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                userNameTextField.setText("");
+                nameFilled = true;
+                enableRegistrationButtons();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+
+            }
+        });
+        userInfoPanel.add(userNameTextField);
+    }
+
+    private void enableRegistrationButtons() {
+        if (nameFilled && surnameFilled){
+            registerForTourButton.setEnabled(true);
+            unregisterFromTourButton.setEnabled(true);
+        }
     }
 
     public void showServerResponse(String response){

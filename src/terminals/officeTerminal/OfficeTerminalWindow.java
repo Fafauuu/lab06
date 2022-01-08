@@ -39,7 +39,7 @@ public class OfficeTerminalWindow extends JFrame {
         mainPanel = new JPanel();
         mainPanel.setLayout(null);
         mainPanel.setBounds(0, 0, 1000, 600);
-        mainPanel.setBackground(new Color(0x9B9B9B));
+        mainPanel.setBackground(new Color(0x144F62));
 
         setGetTourOffersButton();
         setAddTourOfferButton();
