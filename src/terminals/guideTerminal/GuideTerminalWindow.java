@@ -1,6 +1,7 @@
 package terminals.guideTerminal;
 
 import model.Guide;
+import model.Tour;
 import model.Tourist;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class GuideTerminalWindow extends JFrame {
     private boolean surnameFilled;
     private JPanel tourInfoPanel;
     private JLabel tourDescriptionLabel;
-    private Guide guide;
+    private Tour tour;
 
     public GuideTerminalWindow(){
         this.setTitle("GUIDE TERMINAL");
@@ -157,6 +158,24 @@ public class GuideTerminalWindow extends JFrame {
 
     public void showServerResponse(String response){
         this.serverResponseLabel.setText(response);
+    }
+
+    public void refreshTourPanel(Tour tour){
+        this.tour = tour;
+        if (tour != null) {
+            tourDescriptionLabel.setText(
+                "<html>" +
+                    "<p>" + tour.getName() + "</p>" +
+                    "<p><br>" + tour.getDescription() +"</p>" +
+                    "<p><br> Date: " + tour.getDate() +"</p>" +
+                    "<p><br>Spots: " + tour.getSpots() +"</p>" +
+                    "<p><br>Spots available: " + tour.getSpotsAvailable() +"</p>" +
+                "</html>"
+            );
+        } else {
+            tourDescriptionLabel.setText("");
+        }
+//        tourDescriptionLabel.repaint();
     }
 
     public void setGuideTerminalListener(GuideTerminalListener guideTerminalListener) {

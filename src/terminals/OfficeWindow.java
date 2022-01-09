@@ -76,7 +76,7 @@ public class OfficeWindow extends JFrame {
         startServerButton.setEnabled(false);
         startServerButton.addActionListener(e -> {
             if (e.getSource() == startServerButton && officeWindowListener != null) {
-                officeWindowListener.startServer(hostField.getText(), Integer.parseInt(portField.getText()));
+                officeWindowListener.setServerProperties(hostField.getText(), Integer.parseInt(portField.getText()));
                 startServerButton.setVisible(false);
                 stopServerButton.setVisible(true);
             }

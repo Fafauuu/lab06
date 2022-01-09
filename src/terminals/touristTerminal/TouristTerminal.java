@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class TouristTerminal implements TouristTerminalListener{
     public void startConnection() {
         try {
             socket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
+//            socket = new Socket(Office.getServerSocketHost(), findPort());
             outputToServer = new PrintWriter(socket.getOutputStream(), true);
             inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String serverResponse;

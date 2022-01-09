@@ -1,10 +1,8 @@
 package terminals.guideTerminal;
 
-import exceptions.TouristNotParticipatingException;
 import model.Guide;
 import model.Office;
 import model.Tour;
-import model.Tourist;
 import utils.JsonHandler;
 
 import java.io.BufferedReader;
@@ -25,28 +23,32 @@ public class GuideTerminal implements GuideTerminalListener{
     private GuideTerminalWindow guideTerminalWindow;
     private String outputLine;
 
-    private String guideServerHost;
+    private String guideServerHost = "localhost";
     private int guideServerPort;
     private ServerSocket guideServerSocket;
 
     public static void main(String[] args) {
         GuideTerminal guideTerminal = new GuideTerminal();
         guideTerminal.setGuideTerminalWindow(new GuideTerminalWindow());
+        guideTerminal.startServer();
+        guideTerminal.startConnection();
     }
 
     public void startServer() {
         serverThread = new Thread(() -> {
             try {
+                guideServerPort = findPort();
                 guideServerSocket = new ServerSocket(guideServerPort);
                 System.out.println("guide socket server local port: " + guideServerPort);
                 while (true) {
                     Socket officeSocket = guideServerSocket.accept();
-                    System.out.println("office socket local port: " + officeSocket.getPort());
                     outputToOffice = new PrintWriter(officeSocket.getOutputStream(), true);
                     inputFromOffice = new BufferedReader(new InputStreamReader(officeSocket.getInputStream()));
                     String officeInput = inputFromOffice.readLine();
-                    if (officeInput.equals("updateTourInfo:")){
-//                    updateTourInfo();
+                    if (officeInput.contains("updateTourInfo:")){
+                        updateTourInfo(officeInput);
+                    } else {
+                        guideTerminalWindow.showServerResponse(officeInput);
                     }
                     officeSocket.close();
                 }
@@ -54,6 +56,7 @@ public class GuideTerminal implements GuideTerminalListener{
                 e.printStackTrace();
             }
         });
+        serverThread.start();
     }
 
     public void startConnection() {
@@ -70,9 +73,11 @@ public class GuideTerminal implements GuideTerminalListener{
         }
     }
 
-    @Override
-    public void updateTourInfo(Tour tour) {
-
+    public void updateTourInfo(String input) {
+        guideTerminalWindow.showServerResponse("server response: " + input);
+        String jsonTourOffer = input.substring(input.indexOf(":") + 1);
+        Tour tourOffer = JsonHandler.jsonToTour(jsonTourOffer);
+        guideTerminalWindow.refreshTourPanel(tourOffer);
     }
 
     @Override
@@ -94,5 +99,20 @@ public class GuideTerminal implements GuideTerminalListener{
     public void setGuideTerminalWindow(GuideTerminalWindow guideTerminalWindow) {
         this.guideTerminalWindow = guideTerminalWindow;
         guideTerminalWindow.setGuideTerminalListener(this);
+    }
+
+    private int findPort() {
+        int startport = Office.getServerSocketPort() + 1;
+        int stopport = 65535;
+        for (int port = startport; port <= stopport; port++) {
+            try {
+                ServerSocket ss = new ServerSocket(port);
+                ss.close();
+                return port;
+            } catch (IOException ex) {
+                System.out.println("Port " + port + " is occupied.");
+            }
+        }
+        return 0;
     }
 }
