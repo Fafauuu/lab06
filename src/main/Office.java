@@ -25,7 +25,7 @@ public class Office {
     BufferedReader inputFromClient;
     PrintWriter outputToGuide;
 
-    private static final String SERVER_SOCKET_HOST = "127.0.0.1";
+    private static final String SERVER_SOCKET_HOST = "localhost";
     private static final int SERVER_SOCKET_PORT = 4002;
     private static ServerSocket serverSocket;
 
