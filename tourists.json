@@ -1,0 +1,19 @@
+[
+  {
+    "toursParticipated": [
+      {
+        "name": "Hawaii trip",
+        "description": "Hawaii New Year trip",
+        "date": {
+          "year": 2022,
+          "month": 12,
+          "day": 30
+        },
+        "spots": 10,
+        "spotsAvailable": 8
+      }
+    ],
+    "name": "jan",
+    "surname": "dzban"
+  }
+]

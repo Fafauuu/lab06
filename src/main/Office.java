@@ -44,12 +44,10 @@ public class Office {
             serverSocket = new ServerSocket(SERVER_SOCKET_PORT);
             System.out.println("Server started");
             Thread thread = new Thread(() -> {
-                boolean stop = false;
-                while (!stop) {
+                while (true) {
                     try {
                         clientSocket = serverSocket.accept();
                     } catch (IOException e) {
-                        stop = true;
                         e.printStackTrace();
                     }
                     new Office().startServerThread(serverSocket);
@@ -174,18 +172,23 @@ public class Office {
 
     private String registerForTour(String input) {
         guides = DatabaseHandler.readGuideList("guides.json");
+        System.out.println(guides);
         Object[] data = parseRegistrationData(input);
         Tourist tourist = (Tourist) data[0];
         Tour tour = (Tour) data[1];
         for (Tour tourAvailable : tourOffers) {
-            if (tourAvailable.equals(tour)) {
+            if (tourAvailable.equals(tour) && tourAvailable.getSpotsAvailable() != 0) {
                 for (Tourist touristAvailable : tourists) {
                     if (touristAvailable.equals(tourist)) {
+                        if (touristAvailable.getToursParticipated().contains(tourAvailable)){
+                            return "Tourist already participates in tour";
+                        }
                         return tryToRegister(touristAvailable, tourAvailable);
                     }
                 }
-                tourists.add(tourist);
-                return tryToRegister(tourist, tourAvailable);
+                Tourist newTourist = new Tourist(tourist.getName(), tourist.getSurname());
+                tourists.add(newTourist);
+                return tryToRegister(newTourist, tourAvailable);
             }
         }
         return "Registration failed";
@@ -194,7 +197,7 @@ public class Office {
     private String tryToRegister(Tourist tourist, Tour tour) {
         Guide tourGuide = null;
         for (Guide guide : guides) {
-            if (guide.getTourGuided().equals(tour)){
+            if (guide.getTourGuided() != null && guide.getTourGuided().equals(tour)){
                 tourGuide = guide;
             }
         }
@@ -342,7 +345,7 @@ public class Office {
             } else outputToGuide.println(otherMessage);
             guideSocket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("guide terminal not found");
         }
     }
 

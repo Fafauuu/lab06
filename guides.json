@@ -1,1 +1,1 @@
-[{"host":"localhost","port":3026,"name":"jan","surname":"kowalski"}]
+[{"tourGuided":{"name":"Hawaii trip","description":"Hawaii New Year trip","date":{"year":2022,"month":12,"day":30},"spots":10,"spotsAvailable":10},"host":"localhost","port":5050,"name":"nie","surname":"wiem"}]
