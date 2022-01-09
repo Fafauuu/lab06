@@ -1,7 +1,10 @@
-package model;
+package main;
 
 import exceptions.TouristAlreadyParticipatesException;
 import exceptions.TouristNotParticipatingException;
+import model.Guide;
+import model.Tour;
+import model.Tourist;
 import utils.DatabaseHandler;
 import utils.JsonHandler;
 
@@ -18,11 +21,9 @@ public class Office {
     private List<Guide> guides;
     private List<Tourist> tourists;
     private static Socket clientSocket;
-    private Socket guideSocket;
     PrintWriter outputToClient;
     BufferedReader inputFromClient;
     PrintWriter outputToGuide;
-    BufferedReader inputFromGuide;
 
     private static final String SERVER_SOCKET_HOST = "127.0.0.1";
     private static final int SERVER_SOCKET_PORT = 4002;
@@ -41,14 +42,17 @@ public class Office {
     public static void main(String[] args) {
         try {
             serverSocket = new ServerSocket(SERVER_SOCKET_PORT);
+            System.out.println("Server started");
             Thread thread = new Thread(() -> {
-                while (true) {
+                boolean stop = false;
+                while (!stop) {
                     try {
                         clientSocket = serverSocket.accept();
                     } catch (IOException e) {
+                        stop = true;
                         e.printStackTrace();
                     }
-                    new Office().startServer(serverSocket);
+                    new Office().startServerThread(serverSocket);
                 }
             });
             thread.start();
@@ -57,7 +61,7 @@ public class Office {
         }
     }
 
-    public void startServer(ServerSocket serverSocket) {
+    public void startServerThread(ServerSocket serverSocket) {
         Thread thread = new Thread(() -> {
             try {
                 System.out.println("socket server local port: " + serverSocket.getLocalPort());
@@ -85,6 +89,7 @@ public class Office {
                             DatabaseHandler.saveTouristList("tourists.json", tourists);
                         }
                         else if (clientInput.contains("registerForTour:")) {
+                            guides = DatabaseHandler.readGuideList("guides.json");
                             String responseToClient = registerForTour(clientInput);
                             outputToClient.println(responseToClient);
                             DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
@@ -98,6 +103,7 @@ public class Office {
                         }
                         else if (clientInput.contains("addGuide:")) {
                             guides = DatabaseHandler.readGuideList("guides.json");
+                            tourOffers = DatabaseHandler.readTourList("tourOffers.json");
                             addGuide(clientInput);
                             DatabaseHandler.saveGuideList("guides.json", guides);
                         }
@@ -190,6 +196,15 @@ public class Office {
     }
 
     private String tryToRegister(Tourist tourist, Tour tour) {
+        Guide tourGuide = null;
+        for (Guide guide : guides) {
+            if (guide.getTourGuided().equals(tour)){
+                tourGuide = guide;
+            }
+        }
+        if (tourGuide == null) {
+            return "there is no guide of tour: " + tour.getName();
+        }
         try {
             tourist.setToursParticipated(tour);
             tour.removeSpotAvailable();
@@ -197,6 +212,7 @@ public class Office {
             return tourist.getName() + " "
                     + tourist.getSurname() + " already participates in this tour";
         }
+        updateTourInfo(tour, tourGuide.getHost(), tourGuide.getPort(), null);
         return tourist.getName()
                 + " "
                 + tourist.getSurname()
@@ -217,12 +233,16 @@ public class Office {
                 System.out.println("got tour");
                 for (Tourist touristAvailable : tourists) {
                     if (touristAvailable.equals(tourist)) {
-                        System.out.println("got tourist");
                         try {
                             touristAvailable.removeTourParticipated(tourAvailable);
                             tourAvailable.addSpotAvailable();
                         } catch (TouristNotParticipatingException e) {
                             return e.getMessage();
+                        }
+                        for (Guide guide : guides) {
+                            if (guide.getTourGuided().equals(tourAvailable)){
+                                updateTourInfo(tourAvailable, guide.getHost(), guide.getPort(), null);
+                            }
                         }
                         return touristAvailable.getName()
                                 + " "
@@ -316,7 +336,7 @@ public class Office {
 
     private void updateTourInfo(Tour tour, String host, Integer port, String otherMessage) {
         try {
-            guideSocket = new Socket(host, port);
+            Socket guideSocket = new Socket(host, port);
             outputToGuide = new PrintWriter(guideSocket.getOutputStream(), true);
             if (otherMessage == null){
                 outputToGuide.println("updateTourInfo:" + JsonHandler.tourToJson(tour));

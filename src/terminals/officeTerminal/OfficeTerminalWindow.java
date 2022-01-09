@@ -11,7 +11,6 @@ import java.util.List;
 
 public class OfficeTerminalWindow extends JFrame {
     private OfficeTerminalWindowListener officeTerminalViewListener;
-    private JPanel mainPanel;
     private JList<Tour> tourJList;
     private DefaultListModel<Tour> model;
     private JPanel tourInfoPanel;
@@ -25,7 +24,6 @@ public class OfficeTerminalWindow extends JFrame {
     private JTextField tourSpotsTextField;
     private boolean tourSpotsFilled;
     private JLabel tourDescriptionLabel;
-    private JPanel serverResponsePanel;
     private JLabel serverResponseLabel;
     private JButton getTourOffersButton;
     private JButton addTourOfferButton;
@@ -35,7 +33,7 @@ public class OfficeTerminalWindow extends JFrame {
     public OfficeTerminalWindow() {
         this.setTitle("OFFICE TERMINAL");
 
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setLayout(null);
         mainPanel.setBounds(0, 0, 1000, 600);
         mainPanel.setBackground(new Color(0x144F62));
@@ -257,7 +255,7 @@ public class OfficeTerminalWindow extends JFrame {
     }
 
     private void setServerResponsePanel() {
-        serverResponsePanel = new JPanel();
+        JPanel serverResponsePanel = new JPanel();
         serverResponsePanel.setLayout(null);
         serverResponsePanel.setBounds(550,300, 400,50);
         serverResponseLabel = new JLabel();

@@ -1,6 +1,6 @@
 package terminals.touristTerminal;
 
-import model.Office;
+import main.Office;
 import model.Tour;
 import utils.JsonHandler;
 
@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,6 @@ public class TouristTerminal implements TouristTerminalListener{
     private List<Tour> tourOffers;
     private Socket socket;
     private PrintWriter outputToServer;
-    private BufferedReader inputFromServer;
     private String outputLine;
     private TouristTerminalWindow touristTerminalWindow;
 
@@ -25,6 +23,11 @@ public class TouristTerminal implements TouristTerminalListener{
         TouristTerminal touristTerminal = new TouristTerminal();
         touristTerminal.setTouristTerminalWindow(new TouristTerminalWindow());
         touristTerminal.startConnection();
+        try {
+            touristTerminal.getSocket().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public TouristTerminal() {
@@ -33,12 +36,13 @@ public class TouristTerminal implements TouristTerminalListener{
 
     public void startConnection() {
         try {
+            System.out.println(Office.getServerSocketHost());
+            System.out.println(Office.getServerSocketPort());
             socket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
-//            socket = new Socket(Office.getServerSocketHost(), findPort());
             outputToServer = new PrintWriter(socket.getOutputStream(), true);
-            inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String serverResponse;
-            while((serverResponse = this.inputFromServer.readLine()) != null) {
+            while((serverResponse = inputFromServer.readLine()) != null) {
                 touristTerminalWindow.showServerResponse("server response: " + serverResponse);
                 if (serverResponse.contains("tourOffers:")) {
                     String jsonTourOffer = serverResponse.substring(serverResponse.indexOf(":") + 1);
@@ -79,5 +83,9 @@ public class TouristTerminal implements TouristTerminalListener{
     public void setTouristTerminalWindow(TouristTerminalWindow touristTerminalWindow) {
         this.touristTerminalWindow = touristTerminalWindow;
         touristTerminalWindow.setTouristTerminalListener(this);
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

@@ -1,7 +1,7 @@
 package terminals.guideTerminal;
 
 import model.Guide;
-import model.Office;
+import main.Office;
 import model.Tour;
 import utils.JsonHandler;
 
@@ -13,46 +13,42 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class GuideTerminal implements GuideTerminalListener{
-    private Socket officeSocket;
-    private PrintWriter outputToOffice;
     private BufferedReader inputFromOffice;
-    private Socket guideSocket;
     private PrintWriter outputToServer;
-    private BufferedReader inputFromServer;
-    private Thread serverThread;
     private GuideTerminalWindow guideTerminalWindow;
     private String outputLine;
 
-    private String guideServerHost = "localhost";
+    private String guideServerHost;
     private int guideServerPort;
     private ServerSocket guideServerSocket;
 
     public static void main(String[] args) {
         GuideTerminal guideTerminal = new GuideTerminal();
         guideTerminal.setGuideTerminalWindow(new GuideTerminalWindow());
-        guideTerminal.startServer();
+//        guideTerminal.startServer();
         guideTerminal.startConnection();
     }
 
-    public void startServer() {
-        serverThread = new Thread(() -> {
+    @Override
+    public void startServer(String host, int port) {
+        guideServerHost = host;
+        guideServerPort = port;
+        Thread serverThread = new Thread(() -> {
             try {
-                guideServerPort = findPort();
                 guideServerSocket = new ServerSocket(guideServerPort);
                 System.out.println("guide socket server local port: " + guideServerPort);
                 while (true) {
                     Socket officeSocket = guideServerSocket.accept();
-                    outputToOffice = new PrintWriter(officeSocket.getOutputStream(), true);
                     inputFromOffice = new BufferedReader(new InputStreamReader(officeSocket.getInputStream()));
                     String officeInput = inputFromOffice.readLine();
-                    if (officeInput.contains("updateTourInfo:")){
+                    if (officeInput.contains("updateTourInfo:")) {
                         updateTourInfo(officeInput);
                     } else {
                         guideTerminalWindow.showServerResponse(officeInput);
                     }
                     officeSocket.close();
                 }
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });
@@ -61,11 +57,11 @@ public class GuideTerminal implements GuideTerminalListener{
 
     public void startConnection() {
         try {
-            guideSocket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
+            Socket guideSocket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
             outputToServer = new PrintWriter(guideSocket.getOutputStream(), true);
-            inputFromServer = new BufferedReader(new InputStreamReader(guideSocket.getInputStream()));
+            BufferedReader inputFromServer = new BufferedReader(new InputStreamReader(guideSocket.getInputStream()));
             String serverResponse;
-            while((serverResponse = this.inputFromServer.readLine()) != null) {
+            while((serverResponse = inputFromServer.readLine()) != null) {
                 guideTerminalWindow.showServerResponse("server response: " + serverResponse);
             }
         } catch (IOException e) {
@@ -99,20 +95,5 @@ public class GuideTerminal implements GuideTerminalListener{
     public void setGuideTerminalWindow(GuideTerminalWindow guideTerminalWindow) {
         this.guideTerminalWindow = guideTerminalWindow;
         guideTerminalWindow.setGuideTerminalListener(this);
-    }
-
-    private int findPort() {
-        int startport = Office.getServerSocketPort() + 1;
-        int stopport = 65535;
-        for (int port = startport; port <= stopport; port++) {
-            try {
-                ServerSocket ss = new ServerSocket(port);
-                ss.close();
-                return port;
-            } catch (IOException ex) {
-                System.out.println("Port " + port + " is occupied.");
-            }
-        }
-        return 0;
     }
 }

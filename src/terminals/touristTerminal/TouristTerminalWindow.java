@@ -12,7 +12,6 @@ import java.util.List;
 
 public class TouristTerminalWindow extends JFrame {
     private TouristTerminalListener touristTerminalListener;
-    private JPanel mainPanel;
     private JButton getTourOffersButton;
     private JButton registerForTourButton;
     private JButton unregisterFromTourButton;
@@ -20,7 +19,6 @@ public class TouristTerminalWindow extends JFrame {
     private DefaultListModel<Tour> model;
     private JPanel tourInfoPanel;
     private JLabel tourDescriptionLabel;
-    private JPanel serverResponsePanel;
     private JLabel serverResponseLabel;
     private JPanel userInfoPanel;
     private JTextField userNameTextField;
@@ -33,7 +31,7 @@ public class TouristTerminalWindow extends JFrame {
     public TouristTerminalWindow(){
         this.setTitle("TOURIST TERMINAL");
 
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setLayout(null);
         mainPanel.setBounds(0, 0, 1000, 600);
         mainPanel.setBackground(new Color(0x265010));
@@ -160,7 +158,7 @@ public class TouristTerminalWindow extends JFrame {
     }
 
     private void setServerResponsePanel() {
-        serverResponsePanel = new JPanel();
+        JPanel serverResponsePanel = new JPanel();
         serverResponsePanel.setLayout(null);
         serverResponsePanel.setBounds(550,300, 400,50);
         serverResponseLabel = new JLabel();

@@ -1,6 +1,6 @@
 package terminals.officeTerminal;
 
-import model.Office;
+import main.Office;
 import model.Tour;
 import utils.JsonHandler;
 
@@ -14,9 +14,7 @@ import java.util.List;
 
 public class OfficeTerminal implements OfficeTerminalWindowListener {
     private List<Tour> tourOffers;
-    private Socket socket;
     private PrintWriter outputToServer;
-    private BufferedReader inputFromServer;
     private String outputLine;
     private OfficeTerminalWindow officeTerminalWindow;
 
@@ -32,22 +30,16 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
 
     public void startConnection() {
         try {
-            socket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
+            Socket socket = new Socket(Office.getServerSocketHost(), Office.getServerSocketPort());
             outputToServer = new PrintWriter(socket.getOutputStream(), true);
-            inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader inputFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String serverResponse;
-            while(true) {
-                try {
-                    serverResponse = this.inputFromServer.readLine();
-                    officeTerminalWindow.showServerResponse("server response: " + serverResponse);
-
-                    if (serverResponse.contains("tourOffers:")) {
-                        String jsonTourOffer = serverResponse.substring(serverResponse.indexOf(":") + 1);
-                        tourOffers = JsonHandler.jsonToTourList(jsonTourOffer);
-                        addTourOffersToWindow();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+            while((serverResponse = inputFromServer.readLine()) != null) {
+                officeTerminalWindow.showServerResponse("server response: " + serverResponse);
+                if (serverResponse.contains("tourOffers:")) {
+                    String jsonTourOffer = serverResponse.substring(serverResponse.indexOf(":") + 1);
+                    tourOffers = JsonHandler.jsonToTourList(jsonTourOffer);
+                    addTourOffersToWindow();
                 }
             }
         } catch (IOException e) {
