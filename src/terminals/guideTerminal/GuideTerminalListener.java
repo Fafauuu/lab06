@@ -1,7 +1,10 @@
 package terminals.guideTerminal;
 
+import model.Guide;
+import model.Tour;
+
 public interface GuideTerminalListener {
-    void updateTourInfo(String tourInfo);
-    void addGuide(String guideInfo, String host, String port);
-    void removeGuide(String guideInfo, String host, String port);
+    void updateTourInfo(Tour tour);
+    void addGuide(Guide guide);
+    void removeGuide(Guide guide);
 }

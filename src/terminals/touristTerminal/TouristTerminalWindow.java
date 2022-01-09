@@ -19,8 +19,7 @@ public class TouristTerminalWindow extends JFrame {
     private JList<Tour> tourJList;
     private DefaultListModel<Tour> model;
     private JPanel tourInfoPanel;
-    private final JLabel tourNameLabel = new JLabel();
-    private final JLabel tourDescriptionLabel = new JLabel();
+    private JLabel tourDescriptionLabel;
     private JPanel serverResponsePanel;
     private JLabel serverResponseLabel;
     private JPanel userInfoPanel;
@@ -31,19 +30,16 @@ public class TouristTerminalWindow extends JFrame {
     private List<Tour> tourOffers;
     private Tourist tourist;
 
-    public TouristTerminalWindow() throws HeadlessException {
+    public TouristTerminalWindow(){
         this.setTitle("TOURIST TERMINAL");
 
         mainPanel = new JPanel();
         mainPanel.setLayout(null);
         mainPanel.setBounds(0, 0, 1000, 600);
         mainPanel.setBackground(new Color(0x265010));
-
-//        setLoginButton();
         setGetTourOffersButton();
         setRegisterForTourButton();
         setUnregisterFromTourButton();
-//        setLoginTextField();
         setUserInfoTextPanel();
         setTourList();
         setTourPanel();
@@ -55,19 +51,9 @@ public class TouristTerminalWindow extends JFrame {
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setVisible(true);
+        this.getContentPane().requestFocusInWindow();
     }
 
-
-//    private void setLoginButton() {
-//        getTourOffersButton = new JButton("LOGIN");
-//        getTourOffersButton.setBounds(50, 480, 200, 50);
-//        getTourOffersButton.addActionListener(e -> {
-//            if (e.getSource() == getTourOffersButton && touristTerminalListener != null) {
-//                touristTerminalListener.getTourOffers();
-//            }
-//        });
-//        this.add(getTourOffersButton);
-//    }
     private void setGetTourOffersButton() {
         getTourOffersButton = new JButton("GET TOUR OFFERS");
         getTourOffersButton.setBounds(50, 480, 200, 50);
@@ -143,7 +129,6 @@ public class TouristTerminalWindow extends JFrame {
 
     private void tourChosenFromList(Tour tourChosen) {
         if (tourChosen != null) {
-            tourNameLabel.setText(tourChosen.getName());
             tourDescriptionLabel.setText(
                 "<html>" +
                     "<p>" + tourChosen.getName() + "</p>" +
@@ -154,7 +139,6 @@ public class TouristTerminalWindow extends JFrame {
                 "</html>"
             );
         } else {
-            tourNameLabel.setText("");
             tourDescriptionLabel.setText("");
         }
     }
@@ -168,6 +152,7 @@ public class TouristTerminalWindow extends JFrame {
     }
 
     private void setDescriptionLabel() {
+        tourDescriptionLabel = new JLabel();
         tourDescriptionLabel.setVerticalAlignment(JLabel.TOP);
         tourDescriptionLabel.setBounds(5,5,200,400);
         tourDescriptionLabel.setFont(new Font("Arial", Font.PLAIN,18));

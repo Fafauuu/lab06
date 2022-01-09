@@ -14,4 +14,8 @@ public class Guide extends Person {
     public void setTourGuided(Tour tourGuided) {
         this.tourGuided = tourGuided;
     }
+
+    public void removeTourGuided(){
+        this.tourGuided = null;
+    }
 }

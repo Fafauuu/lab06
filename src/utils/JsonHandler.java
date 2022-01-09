@@ -2,6 +2,7 @@ package utils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import model.Guide;
 import model.Tour;
 import model.Tourist;
 
@@ -38,6 +39,12 @@ public class JsonHandler {
         return gson.fromJson(json, Tourist.class);
     }
 
+    public static String guideToJson(Guide guide){
+        return gson.toJson(guide);
+    }
 
+    public static Guide jsonToGuide(String json) {
+        return gson.fromJson(json, Guide.class);
+    }
 
 }

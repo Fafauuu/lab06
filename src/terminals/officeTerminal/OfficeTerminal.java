@@ -39,7 +39,6 @@ public class OfficeTerminal implements OfficeTerminalWindowListener {
             while(true) {
                 try {
                     serverResponse = this.inputFromServer.readLine();
-                    System.out.println("response from server: " + serverResponse);
                     officeTerminalWindow.showServerResponse("server response: " + serverResponse);
 
                     if (serverResponse.contains("tourOffers:")) {

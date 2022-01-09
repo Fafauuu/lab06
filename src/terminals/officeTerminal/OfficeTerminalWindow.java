@@ -24,8 +24,7 @@ public class OfficeTerminalWindow extends JFrame {
     private boolean tourDataFilled;
     private JTextField tourSpotsTextField;
     private boolean tourSpotsFilled;
-    private final JLabel tourNameLabel = new JLabel();
-    private final JLabel tourDescriptionLabel = new JLabel();
+    private JLabel tourDescriptionLabel;
     private JPanel serverResponsePanel;
     private JLabel serverResponseLabel;
     private JButton getTourOffersButton;
@@ -55,6 +54,7 @@ public class OfficeTerminalWindow extends JFrame {
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setVisible(true);
+        this.getContentPane().requestFocusInWindow();
     }
 
     private void setGetTourOffersButton() {
@@ -141,7 +141,6 @@ public class OfficeTerminalWindow extends JFrame {
 
     private void tourChosenFromList(Tour tourChosen) {
         if (tourChosen != null) {
-            tourNameLabel.setText(tourChosen.getName());
             tourDescriptionLabel.setText(
                 "<html>" +
                     "<p>" + tourChosen.getName() + "</p>" +
@@ -152,7 +151,6 @@ public class OfficeTerminalWindow extends JFrame {
                 "</html>"
             );
         } else {
-            tourNameLabel.setText("");
             tourDescriptionLabel.setText("");
         }
     }
@@ -166,6 +164,7 @@ public class OfficeTerminalWindow extends JFrame {
     }
 
     private void setDescriptionLabel() {
+        tourDescriptionLabel = new JLabel();
         tourDescriptionLabel.setVerticalAlignment(JLabel.TOP);
         tourDescriptionLabel.setBounds(5,5,200,400);
         tourDescriptionLabel.setFont(new Font("Arial", Font.PLAIN,18));

@@ -20,7 +20,7 @@ public class DatabaseHandler {
     private static final Type touristListType = new TypeToken<ArrayList<Tourist>>() {
     }.getType();
 
-    public static List<Tour> readTourList(String path) {
+    public synchronized static List<Tour> readTourList(String path) {
         List<Tour> tours = new ArrayList<>();
         try {
             tours = gson.fromJson(new FileReader(path), tourListType);
@@ -31,7 +31,7 @@ public class DatabaseHandler {
         return tours;
     }
 
-    public static void saveTourList(String path, List<Tour> tourList) {
+    public synchronized static void saveTourList(String path, List<Tour> tourList) {
         String json = gson.toJson(tourList, tourListType);
 
         try {
@@ -43,7 +43,7 @@ public class DatabaseHandler {
         }
     }
 
-    public static List<Tourist> readTouristList(String path) {
+    public synchronized static List<Tourist> readTouristList(String path) {
         List<Tourist> tourists = new ArrayList<>();
         try {
             tourists = gson.fromJson(new FileReader(path), touristListType);
@@ -54,7 +54,7 @@ public class DatabaseHandler {
         return tourists;
     }
 
-    public static void saveTouristList(String path, List<Tourist> touristList) {
+    public synchronized static void saveTouristList(String path, List<Tourist> touristList) {
         String json = gson.toJson(touristList);
 
         try {

@@ -26,6 +26,16 @@ public class Office {
     private static final int SERVER_SOCKET_PORT = 4002;
     private static ServerSocket serverSocket;
 
+    public Office() {
+        initializeData();
+    }
+
+    private void initializeData() {
+        this.tourOffers = DatabaseHandler.readTourList("tourOffers.json");
+        this.guides = new ArrayList<>();
+        this.tourists = DatabaseHandler.readTouristList("tourists.json");
+    }
+
     public static void main(String[] args) {
         try {
             serverSocket = new ServerSocket(SERVER_SOCKET_PORT);
@@ -48,55 +58,40 @@ public class Office {
 
     }
 
-    public Office() {
-        initializeData();
-    }
-
-    private void initializeData() {
-        this.tourOffers = DatabaseHandler.readTourList("tourOffers.json");
-        this.guides = new ArrayList<>();
-        this.tourists = DatabaseHandler.readTouristList("tourists.json");
-    }
-
-    private void saveData() {
-        DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
-        DatabaseHandler.saveTouristList("tourists.json", tourists);
-    }
-
     public void startServer(ServerSocket serverSocket) throws IOException {
         System.out.println("socket server local port: " +  serverSocket.getLocalPort());
         clientSocket = serverSocket.accept();
         System.out.println("Socket local port: " + clientSocket.getPort());
         outputToClient = new PrintWriter(clientSocket.getOutputStream(), true);
         inputFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String inputFromClient;
+        String clientInput;
         while(true) {
             try {
-                inputFromClient= this.inputFromClient.readLine();
-                System.out.println("input from client: " + inputFromClient);
-                if (inputFromClient.contains("getTourOffers:")) {
+                clientInput = this.inputFromClient.readLine();
+                System.out.println("input from client: " + clientInput);
+                if (clientInput.contains("getTourOffers:")) {
                     String responseToClient = getTourOffers();
                     outputToClient.println(responseToClient);
                 }
-                if (inputFromClient.contains("addTourOffer:")) {
-                    String responseToClient = addTourOffer(inputFromClient);
+                if (clientInput.contains("addTourOffer:")) {
+                    String responseToClient = addTourOffer(clientInput);
                     outputToClient.println(responseToClient);
                     DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
                 }
-                if (inputFromClient.contains("removeTourOffer:")) {
-                    String responseToClient = removeTourOffer(inputFromClient);
-                    outputToClient.println(responseToClient);
-                    DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
-                    DatabaseHandler.saveTouristList("tourists.json", tourists);
-                }
-                if (inputFromClient.contains("registerForTour:")) {
-                    String responseToClient = registerForTour(inputFromClient);
+                if (clientInput.contains("removeTourOffer:")) {
+                    String responseToClient = removeTourOffer(clientInput);
                     outputToClient.println(responseToClient);
                     DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
                     DatabaseHandler.saveTouristList("tourists.json", tourists);
                 }
-                if (inputFromClient.contains("unregisterFromTour:")) {
-                    String responseToClient = unregisterFromTour(inputFromClient);
+                if (clientInput.contains("registerForTour:")) {
+                    String responseToClient = registerForTour(clientInput);
+                    outputToClient.println(responseToClient);
+                    DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
+                    DatabaseHandler.saveTouristList("tourists.json", tourists);
+                }
+                if (clientInput.contains("unregisterFromTour:")) {
+                    String responseToClient = unregisterFromTour(clientInput);
                     outputToClient.println(responseToClient);
                     DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
                     DatabaseHandler.saveTouristList("tourists.json", tourists);
@@ -114,7 +109,6 @@ public class Office {
             outputToClient.close();
             clientSocket.close();
             serverSocket.close();
-//            this.saveData();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -163,8 +157,9 @@ public class Office {
     }
 
     private String registerForTour(String input) {
-        Tourist tourist = (Tourist) parseRegistrationData(input)[0];
-        Tour tour = (Tour) parseRegistrationData(input)[1];
+        Object[] data = parseRegistrationData(input);
+        Tourist tourist = (Tourist) data[0];
+        Tour tour = (Tour) data[1];
         for (Tour tourAvailable : tourOffers) {
             if (tourAvailable.equals(tour)) {
                 for (Tourist touristAvailable : tourists) {
@@ -196,17 +191,18 @@ public class Office {
     }
 
     private String unregisterFromTour(String input) {
-        Tourist tourist = (Tourist) parseRegistrationData(input)[0];
-        Tour tour = (Tour) parseRegistrationData(input)[1];
-
-
-//        tourOffers = DatabaseHandler.readTourList("tourOffers.json");
-
-
+        Object[] data = parseRegistrationData(input);
+        Tourist tourist = (Tourist) data[0];
+        Tour tour = (Tour) data[1];
         for (Tour tourAvailable : tourOffers) {
+            System.out.println("start");
+            System.out.println(tourAvailable);
+            System.out.println(tour);
             if (tourAvailable.equals(tour)) {
+                System.out.println("got tour");
                 for (Tourist touristAvailable : tourists) {
                     if (touristAvailable.equals(tourist)){
+                        System.out.println("got tourist");
                         try {
                             touristAvailable.removeTourParticipated(tourAvailable);
                             tourAvailable.addSpotAvailable();
@@ -242,15 +238,34 @@ public class Office {
         return output;
     }
 
-    private void updateTourInfo(String tourInfo) {
+    private void updateTourInfo(String input) {
 
     }
 
-    private void addGuide(String guideInfo, String host, String port) {
+    private void addGuide(String input) {
+        Object[] data = parseGuideData(input);
+        Guide guide = (Guide) data[0];
+        String guideHost = (String) data[1];
+        Integer guidePart = (Integer) data[2];
+        openGuideSocket();
+    }
+
+    private void removeGuide(String input) {
 
     }
 
-    private void removeGuide(String guideInfo, String host, String port) {
+    private Object[] parseGuideData(String input){
+        Object[] output = new Object[3];
+        String jsonInput = input.substring(input.indexOf(":") + 1);
+        String[] parts = jsonInput.split("&");
+        String jsonGuide = parts[0];
+        output[0] = JsonHandler.jsonToGuide(jsonGuide);
+        output[1] = parts[1];
+        output[2] = Integer.parseInt(parts[2]);
+        return output;
+    }
+
+    private void openGuideSocket() {
 
     }
 

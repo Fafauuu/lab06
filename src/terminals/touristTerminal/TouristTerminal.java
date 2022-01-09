@@ -57,7 +57,7 @@ public class TouristTerminal implements TouristTerminalListener{
     }
 
     @Override
-    public void unregisterFromTour(String tour, String tourist) {
+    public void unregisterFromTour(String tourist, String tour) {
         outputLine = "unregisterFromTour:";
         System.out.println("send this to server: " + outputLine);
         outputToServer.println(outputLine + tourist + "&" + tour);
