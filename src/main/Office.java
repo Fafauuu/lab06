@@ -89,7 +89,6 @@ public class Office {
                             DatabaseHandler.saveTouristList("tourists.json", tourists);
                         }
                         else if (clientInput.contains("registerForTour:")) {
-                            guides = DatabaseHandler.readGuideList("guides.json");
                             String responseToClient = registerForTour(clientInput);
                             outputToClient.println(responseToClient);
                             DatabaseHandler.saveTourList("tourOffers.json", tourOffers);
@@ -102,13 +101,10 @@ public class Office {
                             DatabaseHandler.saveTouristList("tourists.json", tourists);
                         }
                         else if (clientInput.contains("addGuide:")) {
-                            guides = DatabaseHandler.readGuideList("guides.json");
-                            tourOffers = DatabaseHandler.readTourList("tourOffers.json");
                             addGuide(clientInput);
                             DatabaseHandler.saveGuideList("guides.json", guides);
                         }
                         else if (clientInput.contains("removeGuide:")) {
-                            guides = DatabaseHandler.readGuideList("guides.json");
                             removeGuide(clientInput);
                             DatabaseHandler.saveGuideList("guides.json", guides);
                         }
@@ -172,12 +168,12 @@ public class Office {
     }
 
     private String getTourOffers() {
-        //TODO: remove hard reading data
         tourOffers = DatabaseHandler.readTourList("tourOffers.json");
         return "tourOffers:" + JsonHandler.tourListToJson(tourOffers);
     }
 
     private String registerForTour(String input) {
+        guides = DatabaseHandler.readGuideList("guides.json");
         Object[] data = parseRegistrationData(input);
         Tourist tourist = (Tourist) data[0];
         Tour tour = (Tour) data[1];
@@ -274,6 +270,8 @@ public class Office {
     }
 
     private void addGuide(String input) {
+        guides = DatabaseHandler.readGuideList("guides.json");
+        tourOffers = DatabaseHandler.readTourList("tourOffers.json");
         Object[] data = parseGuideData(input);
         Guide guide = (Guide) data[0];
         String guideHost = (String) data[1];
@@ -314,6 +312,7 @@ public class Office {
     }
 
     private void removeGuide(String input) {
+        guides = DatabaseHandler.readGuideList("guides.json");
         Object[] data = parseGuideData(input);
         Guide guide = (Guide) data[0];
         String guideHost = (String) data[1];
